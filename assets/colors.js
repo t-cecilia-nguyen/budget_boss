@@ -4,5 +4,6 @@ export const Colors = {
     greyBlue: "#577590", // Light grey color - navigation icons
     green: "#90BE6D", // success, income
     red: "#F94144", // error, expense
-    lightBlue: "#73BFDC" // budget
+    lightBlue: "#73BFDC", // budget
+    darkBlue: "#023047",
 }
