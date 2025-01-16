@@ -14,13 +14,26 @@ const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigator() {
     return (
-        <Drawer.Navigator initialRouteName="Dashboard">
+        <Drawer.Navigator 
+        initialRouteName="Dashboard"
+        screenOptions={{
+            headerStyle: {
+                backgroundColor: Colors.darkBlue,
+            },
+            headerTintColor: Colors.grey,
+            drawerStyle: {
+                backgroundColor: Colors.darkBlue,
+                width: 280,
+            },
+            drawerActiveTintColor: Colors.accentYellow,
+            drawerInactiveTintColor: Colors.greyBlue,
+        }}>
             <Drawer.Screen 
             name="MyAccount" 
             component={MyAccount}
             options={{
                 drawerIcon: ({}) => (
-                    <MaterialIcons name="account-circle" size={24} color={Colors.lightGrey}/>
+                    <MaterialIcons name="account-circle" size={24} color={Colors.grey}/>
                 ),
                 headerTitle: () => null,
             }}
@@ -30,7 +43,7 @@ export default function DrawerNavigator() {
             component={BottomTabNavigator}
             options={{
                 drawerIcon: ({}) => (
-                    <MaterialIcons name="leaderboard" size={24} color={Colors.lightGrey}/>
+                    <MaterialIcons name="leaderboard" size={24} color={Colors.grey}/>
                 ),
                 headerTitle: () => null,
             }}
@@ -40,7 +53,7 @@ export default function DrawerNavigator() {
             component={Settings} 
             options={{
                 drawerIcon: ({}) => (
-                    <MaterialIcons name="settings" size={24} color={Colors.lightGrey}/>
+                    <MaterialIcons name="settings" size={24} color={Colors.grey}/>
                 ),
                 headerTitle: () => null,
             }}
@@ -50,7 +63,7 @@ export default function DrawerNavigator() {
             component={SignOut}
             options={{
                 drawerIcon: ({}) => (
-                    <MaterialIcons name="exit-to-app" size={24} color={Colors.lightGrey}/>
+                    <MaterialIcons name="exit-to-app" size={24} color={Colors.grey}/>
                 ),
                 headerTitle: () => null,
             }}
