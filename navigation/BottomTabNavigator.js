@@ -20,8 +20,11 @@ export default function BottomTabNavigator() {
                 initialRouteName="Transactions" 
                 screenOptions={{ 
                     headerShown: false, 
+                    tabBarStyle: {
+                        backgroundColor: Colors.darkBlue,
+                    },
                     tabBarActiveTintColor: Colors.accentYellow, 
-                    tabBarInactiveTintColor: Colors.lightGrey 
+                    tabBarInactiveTintColor: Colors.grey, 
                 }}>
                 <Tab.Screen 
                     name="Transactions" 
@@ -31,7 +34,7 @@ export default function BottomTabNavigator() {
                             <MaterialIcons 
                                 name="view-list" 
                                 size={28} 
-                                color={focused ? Colors.accentYellow : Colors.lightGrey} />
+                                color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
                 <Tab.Screen 
@@ -42,7 +45,7 @@ export default function BottomTabNavigator() {
                             <MaterialIcons 
                                 name="pie-chart" 
                                 size={28} 
-                                color={focused ? Colors.accentYellow : Colors.lightGrey} />
+                                color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
                 <Tab.Screen 
@@ -53,7 +56,7 @@ export default function BottomTabNavigator() {
                             <MaterialIcons 
                                 name="currency-exchange" 
                                 size={28} 
-                                color={focused ? Colors.accentYellow : Colors.lightGrey} />
+                                color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
                 <Tab.Screen 
@@ -64,7 +67,7 @@ export default function BottomTabNavigator() {
                             <MaterialIcons 
                                 name="category" 
                                 size={30} 
-                                color={focused ? Colors.accentYellow : Colors.lightGrey} />
+                                color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
                 <Tab.Screen 
@@ -75,7 +78,7 @@ export default function BottomTabNavigator() {
                             <MaterialIcons 
                                 name="stacked-line-chart" 
                                 size={28} 
-                                color={focused ? Colors.accentYellow : Colors.lightGrey} />
+                                color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
             </Tab.Navigator>
