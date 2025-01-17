@@ -1,5 +1,7 @@
+import React from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { createDrawerNavigator} from '@react-navigation/drawer';
 import { Colors } from '../assets/colors';
 
 // Import bottom tabs
@@ -12,10 +14,30 @@ import SignOut from '../screens/SignOut';
 
 const Drawer = createDrawerNavigator();
 
+function CustomDrawerContent(props) {
+    return (
+        <DrawerContentScrollView {...props}>
+            {/* Profile Section */}
+            <View style={styles.profileSection}>
+                <Image
+                    source={require('../assets/icon.png') } // Profile picture
+                    style={styles.profileImage}
+                />
+                <Text style={styles.profileName}>Test Name</Text>
+                <Text style={styles.profileEmail}>email@gmail.com</Text>
+            </View>
+
+            {/* Navigation Items */}
+            <DrawerItemList {...props} />
+        </DrawerContentScrollView>
+    );
+}
+
 export default function DrawerNavigator() {
     return (
         <Drawer.Navigator 
         initialRouteName="Dashboard"
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
             headerStyle: {
                 backgroundColor: Colors.darkBlue,
@@ -29,7 +51,7 @@ export default function DrawerNavigator() {
             drawerInactiveTintColor: Colors.greyBlue,
         }}>
             <Drawer.Screen 
-            name="MyAccount" 
+            name="My Account" 
             component={MyAccount}
             options={{
                 drawerIcon: ({}) => (
@@ -71,3 +93,28 @@ export default function DrawerNavigator() {
         </Drawer.Navigator>
     );
 }
+
+const styles = StyleSheet.create({
+    profileSection: {
+        alignItems: 'center',
+        paddingVertical: 20,
+        backgroundColor: Colors.darkBlue,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.greyBlue,
+    },
+    profileImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        marginBottom: 10,
+    },
+    profileName: {
+        fontSize: 18,
+        color: Colors.accentYellow,
+        fontWeight: 'bold',
+    },
+    profileEmail: {
+        fontSize: 14,
+        color: Colors.greyBlue,
+    },
+});

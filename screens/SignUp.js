@@ -29,9 +29,9 @@ export default function SignUpScreen({ navigation }) {
                             placeholder="First Name"
                             value={firstName}
                             onChangeText={setFirstName}
-                            placeholderTextColor="#808080"
+                            placeholderTextColor={Colors.grey}
                         />
-                    /</View>
+                    </View>
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="person" size={24} style={styles.icon}/>
                         <TextInput
@@ -39,7 +39,7 @@ export default function SignUpScreen({ navigation }) {
                             placeholder="Last Name"
                             value={lastName}
                             onChangeText={setLastName}
-                            placeholderTextColor="#808080"
+                            placeholderTextColor={Colors.grey}
                         />
                     </View>
                     <View style={styles.inputContainer}>
@@ -50,7 +50,7 @@ export default function SignUpScreen({ navigation }) {
                             value={email}
                             onChangeText={setEmail}
                             keyboardType="email-address"
-                            placeholderTextColor="#808080"
+                            placeholderTextColor={Colors.grey}
                             autoCapitalize="none"
                         />
                     </View>
@@ -62,7 +62,7 @@ export default function SignUpScreen({ navigation }) {
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
-                            placeholderTextColor="#808080"
+                            placeholderTextColor={Colors.grey}
                         />
                     </View>
                     <View style={styles.inputContainer}>
@@ -73,7 +73,7 @@ export default function SignUpScreen({ navigation }) {
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry
-                            placeholderTextColor="#808080"
+                            placeholderTextColor={Colors.grey}
                         />
                     </View>
                     <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 40,
         marginBottom: 20,
-        color: Colors.primaryBlue,
+        color: Colors.darkBlue,
     },
     inputContainer: {
         position: 'relative',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     input: {
         width: '100%',
         height: 50,
-        borderColor: Colors.primaryBlue,
+        borderColor: Colors.darkBlue,
         borderWidth: 2,
         borderRadius: 20,
         marginTop: 10,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     signupButton: {
         width: '100%',
         height: 50,
-        backgroundColor: Colors.primaryBlue,
+        backgroundColor: Colors.darkBlue,
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
@@ -146,6 +146,6 @@ const styles = StyleSheet.create({
     },
     loginText: {
         marginTop: 20,
-        color: Colors.primaryBlue,
+        color: Colors.darkBlue,
     },
 });

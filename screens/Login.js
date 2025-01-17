@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground  } from 'react-native';
 import { Colors } from '../assets/colors';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -31,23 +32,29 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.overlay}>
                 <View style={styles.card}>
                     <Text style={styles.title}>Login</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Email"
-                        value={email}
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        placeholderTextColor="#808080"
-                        autoCapitalize="none"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Password"
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        placeholderTextColor="#808080"
-                    />
+                    <View style={styles.inputContainer}>
+                        <MaterialIcons name="email" size={24} style={styles.icon}/>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Email"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            placeholderTextColor={Colors.grey}
+                            autoCapitalize="none"
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <MaterialIcons name="lock" size={24} style={styles.icon}/>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Password"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                            placeholderTextColor={Colors.grey}
+                        />
+                    </View>
                     <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                         <Text style={styles.loginButtonText}>LOGIN</Text>
                     </TouchableOpacity>
@@ -81,21 +88,32 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 40,
         marginBottom: 20,
-        color: Colors.primaryBlue,
+        color: Colors.darkBlue,
+    },
+    inputContainer: {
+        position: 'relative',
+        width: '100%',
     },
     input: {
         width: '100%',
         height: 50,
-        borderColor: Colors.primaryBlue,
+        borderColor: Colors.darkBlue,
         borderWidth: 2,
         borderRadius: 20,
         marginTop: 10,
-        paddingLeft: 10,
+        paddingLeft: 40,
+    },
+    icon: {
+        position: 'absolute',
+        left: 12,
+        top: 22,
+        color: Colors.darkBlue,
+        size: 24,
     },
     loginButton: {
         width: '100%',
         height: 50,
-        backgroundColor: Colors.primaryBlue,
+        backgroundColor: Colors.darkBlue,
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
@@ -108,6 +126,6 @@ const styles = StyleSheet.create({
     },
     link: {
         marginTop: 20,
-        color: Colors.primaryBlue,
+        color: Colors.darkBlue,
     },
 });
