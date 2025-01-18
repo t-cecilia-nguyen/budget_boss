@@ -1,7 +1,7 @@
 import os
 import sqlite3
 
-DATABASE = './backend/database.db'
+DATABASE = './database.db'
 
 def init_db():
     try:

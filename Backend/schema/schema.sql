@@ -5,3 +5,12 @@ CREATE TABLE IF NOT EXISTS users (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL
 );
+
+--DROP TABLE IF EXISTS categories;
+CREATE TABLE IF NOT EXISTS categories (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    type TEXT NOT NULL,
+    description TEXT,
+    img_name TEXT NOT NULL
+);
