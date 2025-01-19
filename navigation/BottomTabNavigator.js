@@ -17,7 +17,7 @@ export default function BottomTabNavigator() {
     return (
         <View style={{ flex: 1 }}>
             <Tab.Navigator 
-                initialRouteName="Transactions" 
+                initialRouteName="Categories" 
                 screenOptions={{ 
                     headerShown: false, 
                     tabBarStyle: {
