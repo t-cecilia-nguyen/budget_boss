@@ -4,20 +4,23 @@ import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 const CustomButtonTab = ({ title, selectedButton, setSelectedButton }) => {
   return (
-    <View>
-      <Text style={styles.buttonText}>{title}</Text>
-      <TouchableWithoutFeedback
+ 
+    <TouchableWithoutFeedback
+      onPress={() => {
+        setSelectedButton(title);
+      }}
+    >
+     <Text style={styles.buttonText}>{title}</Text>
+
+      <View
         style={[
           styles.button,
-          {
-            backgroundColor: selectedButton === title ? "#32659A" : "",
-          },
+          { backgroundColor: selectedButton === title ? "#32659A" : "transparent" },
         ]}
-        onPress={() => {
-          setSelectedButton(title);
-        }}
-      />
-    </View>
+      >
+       
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

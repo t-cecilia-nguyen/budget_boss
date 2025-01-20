@@ -1,13 +1,15 @@
-import { StyleSheet, Text, View, Dimensions } from "react-native";
+import { StyleSheet, Text, View, Dimensions, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
-
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 const { width: screenWidth } = Dimensions.get("window");
 
+const basePath = "http://10.0.2.2:5000/uploads/";
+
 const ExpenseComponent = () => {
   const [categories, setCategories] = useState([]);
+  const [newCategory, setNewCategory] = useState();
 
   useEffect(() => {
     fetch("http://10.0.2.2:5000/categories", {
@@ -15,22 +17,36 @@ const ExpenseComponent = () => {
     })
       .then((resp) => resp.json())
       .then((data) => {
-        setCategories(data);
-        console.log(data);
+        // Use the base path to construct the image URLs
+        const categoriesItems = data.map((item) => ({
+          ...item,
+          img_url: `${basePath}${item.img_name}`,
+        }))
+        .filter((item) => item.type === "Expense");
+        setCategories(categoriesItems);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []);
+  }, [newCategory]);
 
   const renderData = (item) => {
+    
     return (
       <View style={styles.itemCard}>
         <View style={styles.itemInfo}>
-          <View style={styles.imageBox}></View>
+          <View style={styles.imageBox}>
+            <Image
+              style={{ width: 35, height: 35 }}
+              resizeMode="center"
+              source={{ uri: item.img_url }} 
+              />
+          </View>
           <View style={styles.itemText}>
             <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
-            <Text style={{ color: "grey" }}>{item.description}</Text>
+            <Text style={{ color: "grey", fontSize: 12 }}>
+              {item.description}
+            </Text>
           </View>
         </View>
         <FontAwesome6 name="greater-than" size={16} color="lightgrey" />
@@ -75,27 +91,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderWidth: 1,
-    width: "100%",
+        width: "100%",
     paddingHorizontal: 20,
     marginVertical: 10,
   },
   itemInfo: {
-    borderWidth: 1,
-    borderColor: "pink",
-    width: 80,
+    width: 150,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
   },
   itemText: {
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "center",
+    width: 90,
   },
   imageBox: {
     height: 40,
     width: 40,
-    borderWidth: 1,
   },
 });
