@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert } from 'react-native';
 import { Colors } from '../assets/colors';
 import { MaterialIcons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 
 export default function SignUpScreen({ navigation }) {
     const [firstName, setFirstName] = useState('');
@@ -11,8 +12,27 @@ export default function SignUpScreen({ navigation }) {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const handleSignUp = async () => {
-        
-    };
+        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/signup`;
+        try {
+            const response = await fetch(backend_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    firstName,
+                    lastName,
+                    email,
+                    password,
+                }),
+            });
+    
+            const data = await response.json();
+            console.log('Response:', data);
+        } catch (error) {
+            console.error('Error during signup:', error);
+        }
+    };    
 
     return (
         <ImageBackground 
