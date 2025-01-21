@@ -31,7 +31,6 @@ export default function LoginScreen({ navigation }) {
         return isValid;
         
     };
-    
 
     const handleLogin = async () => {
         // Validate inputs
@@ -58,7 +57,6 @@ export default function LoginScreen({ navigation }) {
             if (data.error) {
                 Alert.alert("Error", data.error);
             } else {
-                Alert.alert("Success", "Login successful!");
                 navigation.navigate('DrawerNavigator');
             }
         } catch (error) {

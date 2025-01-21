@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
 
 // Import bottom tabs
@@ -10,9 +11,31 @@ import BottomTabNavigator from './BottomTabNavigator';
 // Import screens
 import MyAccount from '../screens/MyAccount';
 import Settings from '../screens/Settings';
-import SignOut from '../screens/SignOut';
 
 const Drawer = createDrawerNavigator();
+
+const SignOut = ({ navigation }) => {
+    const handleSignOut = async () => {
+        try {
+            // Clear token from storage
+            await AsyncStorage.removeItem('token');
+
+            // Sign Out confirmation
+            Alert.alert('Sign Out', 'You have successfully signed out!', [
+                { text: 'OK', onPress: () => navigation.replace('Login') },
+            ]);
+        } catch (error) {
+            console.error('Error during sign out:', error);
+            Alert.alert('Sign Out', 'An error occurred while signing out.');
+        }
+    };
+
+    React.useEffect(() => {
+        handleSignOut();
+    }, []);
+
+    return null;
+};
 
 function CustomDrawerContent(props) {
     return (
