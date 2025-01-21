@@ -1,15 +1,26 @@
-import { StyleSheet, Text, View, Dimensions, Image } from "react-native";
+import { StyleSheet, Text, View, Dimensions, Image, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { useNavigation } from "@react-navigation/native";
+
 
 const { width: screenWidth } = Dimensions.get("window");
-
 const basePath = "http://10.0.2.2:5000/uploads/";
 
 const ExpenseComponent = () => {
+  
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState();
+
+  const navigation = useNavigation();
+
+  const handleArrowPress = (item) => {
+    navigation.navigate("EditCategory", {data: item});
+  };
+
+
+
 
   useEffect(() => {
     fetch("http://10.0.2.2:5000/categories", {
@@ -18,11 +29,12 @@ const ExpenseComponent = () => {
       .then((resp) => resp.json())
       .then((data) => {
         // Use the base path to construct the image URLs
-        const categoriesItems = data.map((item) => ({
-          ...item,
-          img_url: `${basePath}${item.img_name}`,
-        }))
-        .filter((item) => item.type === "Expense");
+        const categoriesItems = data
+          .map((item) => ({
+            ...item,
+            img_url: `${basePath}${item.img_name}`,
+          }))
+          .filter((item) => item.type === "Expense");
         setCategories(categoriesItems);
       })
       .catch((error) => {
@@ -31,7 +43,6 @@ const ExpenseComponent = () => {
   }, [newCategory]);
 
   const renderData = (item) => {
-    
     return (
       <View style={styles.itemCard}>
         <View style={styles.itemInfo}>
@@ -39,8 +50,8 @@ const ExpenseComponent = () => {
             <Image
               style={{ width: 35, height: 35 }}
               resizeMode="center"
-              source={{ uri: item.img_url }} 
-              />
+              source={{ uri: item.img_url }}
+            />
           </View>
           <View style={styles.itemText}>
             <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
@@ -49,14 +60,16 @@ const ExpenseComponent = () => {
             </Text>
           </View>
         </View>
-        <FontAwesome6 name="greater-than" size={16} color="lightgrey" />
+
+        <TouchableOpacity onPress={ () => handleArrowPress(item)}>
+          <FontAwesome6 name="greater-than" size={16} color="lightgrey" />
+        </TouchableOpacity>
       </View>
     );
   };
 
   return (
     <View style={styles.bodyCard}>
-      <Text>ExpenseComponent</Text>
       <FlatList
         data={categories}
         renderItem={({ item }) => {
@@ -91,12 +104,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-        width: "100%",
+    width: "100%",
     paddingHorizontal: 20,
     marginVertical: 10,
   },
   itemInfo: {
-    width: 150,
+    width: "60%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -105,7 +118,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "center",
-    width: 90,
+    width: "70%",
   },
   imageBox: {
     height: 40,

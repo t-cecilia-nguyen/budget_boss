@@ -17,7 +17,6 @@ const IncomeComponent = () => {
     })
       .then((resp) => resp.json())
       .then((data) => {
-        // Use the base path to construct the image URLs
         const categoriesItems = data.map((item) => ({
           ...item,
           img_url: `${basePath}${item.img_name}`,
@@ -56,7 +55,6 @@ const IncomeComponent = () => {
 
   return (
     <View style={styles.bodyCard}>
-      <Text>IncomeComponent</Text>
       <FlatList
         data={categories}
         renderItem={({ item }) => {
@@ -96,7 +94,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   itemInfo: {
-    width: 150,
+    width: '60%',
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -105,7 +103,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "center",
-    width: 90,
+    width: '70%',
   },
   imageBox: {
     height: 40,
