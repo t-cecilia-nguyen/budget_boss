@@ -98,6 +98,60 @@ def login():
     except Exception as e:
         print(f"Error: {e}")  # Debug: Print any errors
         return jsonify({"error": str(e)}), 500
+    
+@app.route('/profile', methods=['GET'])
+def get_profile():
+    # Debug: Print when route hit
+    print("Profile route hit")
+
+    try:
+        # Get Authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Authorization token is missing or invalid"}), 401
+
+        # Extract token
+        token = auth_header.split(" ")[1]
+
+        try:
+            # Decode the token and verify with secret key
+            payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_id = payload.get('user_id')
+            print(f"Token payload: {payload}")
+
+            if not user_id:
+                return jsonify({"error": "Invalid token"}), 401
+
+            # Fetch user info
+            db = get_db()
+            user = db.execute('''
+                SELECT id, first_name, last_name, email
+                FROM users
+                WHERE id = ?
+            ''', (user_id,)).fetchone()
+
+            if not user:
+                return jsonify({"error": "User not found"}), 404
+            
+            # Convert Row object to a dictionary
+            user = {
+                "id": user['id'],
+                "firstName": user['first_name'],
+                "lastName": user['last_name'],
+                "email": user['email']
+            }
+            print(f"User: {user}")
+
+            return jsonify(user), 200
+
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
+
+    except Exception as e:
+        print(f"Error: {e}")  # Debug: Print any errors
+        return jsonify({"error": str(e)}), 500
 
 # Close database after each request
 @app.teardown_appcontext

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground  } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Constants from 'expo-constants';
+
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -52,12 +54,16 @@ export default function LoginScreen({ navigation }) {
                 }),
             });
 
-            const data = await response.json();
-            console.log('Response:', data);
-            if (data.error) {
-                Alert.alert("Error", data.error);
+            if (response.ok) {
+                const data = await response.json();
+                const token = data.token;
+                // Save token to AsyncStorage
+                await AsyncStorage.setItem('token', token);
+                console.log('Token saved:', token);
+                navigation.navigate('DrawerNavigator'); // Navigate to Dashboard
             } else {
-                navigation.navigate('DrawerNavigator');
+                Alert.alert("Error", "An error occurred while logging in. Please try again.");
+                console.error('Login failed:', response.statusText);
             }
         } catch (error) {
             console.error('Error during login:', error);

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, Alert } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
+import Constants from 'expo-constants';
 
 // Import bottom tabs
 import BottomTabNavigator from './BottomTabNavigator';
@@ -38,6 +39,42 @@ const SignOut = ({ navigation }) => {
 };
 
 function CustomDrawerContent(props) {
+    const [user, setUser] = useState({ name: '', email: '' });
+    
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile`;
+
+                if (token) {
+                    const response = await fetch(backendUrl, {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log("User data: ", data);
+                        setUser({
+                            name: `${data.firstName} ${data.lastName}`,
+                            email: data.email,
+                        });
+                    } else {
+                        console.error('Failed to fetch user info:', response.statusText);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
     return (
         <DrawerContentScrollView {...props}>
             {/* Profile Section */}
@@ -46,8 +83,8 @@ function CustomDrawerContent(props) {
                     source={require('../assets/icon.png') } // Profile picture
                     style={styles.profileImage}
                 />
-                <Text style={styles.profileName}>Test Name</Text>
-                <Text style={styles.profileEmail}>email@gmail.com</Text>
+                <Text style={styles.profileName}>{user.name}</Text>
+                <Text style={styles.profileEmail}>{user.email}</Text>
             </View>
 
             {/* Navigation Items */}

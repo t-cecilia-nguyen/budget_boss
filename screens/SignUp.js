@@ -19,7 +19,7 @@ export default function SignUpScreen({ navigation }) {
         password: '',
         confirmPassword: '',
     });
-    
+
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$/;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 
@@ -84,7 +84,7 @@ export default function SignUpScreen({ navigation }) {
                 Alert.alert("Error", data.error);
             } else {
                 Alert.alert("Success", "User created successfully!");
-                navigation.navigate('Login');
+                navigation.navigate('Login'); // Navigate to Login
             }
         } catch (error) {
             console.error('Error during signup:', error);
