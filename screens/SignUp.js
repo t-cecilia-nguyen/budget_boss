@@ -11,7 +11,58 @@ export default function SignUpScreen({ navigation }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
+    // Error states for each field
+    const [errors, setErrors] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+    });
+    
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+
+    const validateInputs = () => {
+        let isValid = true;
+        let tempErrors = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
+
+        if (!firstName) {
+            tempErrors.firstName = 'First name is required';
+            isValid = false;
+        }
+        if (!lastName) {
+            tempErrors.lastName = 'Last name is required';
+            isValid = false;
+        }
+        if (!email) {
+            tempErrors.email = 'Email is required';
+            isValid = false;
+        } else if (!emailRegex.test(email)) {
+            tempErrors.email = 'Please enter a valid email';
+            isValid = false;
+        }
+        if (!password) {
+            tempErrors.password = 'Password is required';
+            isValid = false;
+        } else if (!passwordRegex.test(password)) {
+            tempErrors.password = 'Password must be minimum 8 characters, at least 1 uppercase letter, 1 lowercase letter and 1 number';
+            isValid = false;
+        }
+        if (password !== confirmPassword) {
+            tempErrors.confirmPassword = 'Passwords do not match';
+            isValid = false;
+        }
+        
+        setErrors(tempErrors);
+        return isValid;
+    };
+
     const handleSignUp = async () => {
+        // Validate inputs
+        const isValid = validateInputs();
+        if (!isValid) return;
+
         const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/signup`;
         try {
             const response = await fetch(backend_url, {
@@ -26,13 +77,34 @@ export default function SignUpScreen({ navigation }) {
                     password,
                 }),
             });
-    
+
             const data = await response.json();
             console.log('Response:', data);
+            if (data.error) {
+                Alert.alert("Error", data.error);
+            } else {
+                Alert.alert("Success", "User created successfully!");
+                navigation.navigate('Login');
+            }
         } catch (error) {
             console.error('Error during signup:', error);
         }
     };    
+
+    // Error: Border
+    const getInputStyle = (field) => {
+        return {
+            ...styles.input,
+            borderColor: errors[field] ? Colors.red : Colors.darkBlue,
+        };
+    };
+
+    // Error: Text
+    const getErrorTextStyle = (field) => {
+        return {
+            color: errors[field] ? Colors.red : 'transparent',
+        };
+    };
 
     return (
         <ImageBackground 
@@ -45,27 +117,29 @@ export default function SignUpScreen({ navigation }) {
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="person" size={24} style={styles.icon}/>
                         <TextInput
-                            style={styles.input}
+                            style={getInputStyle('firstName')}
                             placeholder="First Name"
                             value={firstName}
                             onChangeText={setFirstName}
                             placeholderTextColor={Colors.grey}
                         />
+                        <Text style={getErrorTextStyle('firstName')}>{errors.firstName}</Text>
                     </View>
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="person" size={24} style={styles.icon}/>
                         <TextInput
-                            style={styles.input}
+                            style={getInputStyle('lastName')}
                             placeholder="Last Name"
                             value={lastName}
                             onChangeText={setLastName}
                             placeholderTextColor={Colors.grey}
                         />
+                        <Text style={getErrorTextStyle('lastName')}>{errors.lastName}</Text>
                     </View>
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="email" size={24} style={styles.icon}/>
                         <TextInput
-                            style={styles.input}
+                            style={getInputStyle('email')}
                             placeholder="Email"
                             value={email}
                             onChangeText={setEmail}
@@ -73,28 +147,31 @@ export default function SignUpScreen({ navigation }) {
                             placeholderTextColor={Colors.grey}
                             autoCapitalize="none"
                         />
+                        <Text style={getErrorTextStyle('email')}>{errors.email}</Text>
                     </View>
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="lock" size={24} style={styles.icon}/>
                         <TextInput
-                            style={styles.input}
+                            style={getInputStyle('password')}
                             placeholder="Password"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
                             placeholderTextColor={Colors.grey}
                         />
+                        <Text style={getErrorTextStyle('password')}>{errors.password}</Text>
                     </View>
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="lock" size={24} style={styles.icon}/>
                         <TextInput
-                            style={styles.input}
+                            style={getInputStyle('confirmPassword')}
                             placeholder="Confirm Password"
                             value={confirmPassword}
                             onChangeText={setConfirmPassword}
                             secureTextEntry
                             placeholderTextColor={Colors.grey}
                         />
+                        <Text style={getErrorTextStyle('confirmPassword')}>{errors.confirmPassword}</Text>
                     </View>
                     <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
                         <Text style={styles.signupButtonText}>SIGNUP</Text>
@@ -149,7 +226,6 @@ const styles = StyleSheet.create({
         left: 12,
         top: 22,
         color: Colors.darkBlue,
-        size: 24,
     },
     signupButton: {
         width: '100%',
@@ -158,7 +234,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 50,
+        marginTop: 10,
     },
     signupButtonText: {
         color: '#FFFFFF',

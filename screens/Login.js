@@ -2,40 +2,98 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ImageBackground  } from 'react-native';
 import { Colors } from '../assets/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Constants from 'expo-constants';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    // Credentials for testing
-    const testEmail = 'email@gmail.com';
-    const testPassword = 'password';
+    // Error states for each field
+    const [errors, setErrors] = useState({
+        email: '',
+        password: '',
+    });
+
+    const validateInputs = () => {
+        let isValid = true;
+        let tempErrors = { email: '', password: '' };
+
+        if (!email) {
+            tempErrors.email = 'Email is required';
+            isValid = false;
+        } 
+        if (!password) {
+            tempErrors.password = 'Password is required';
+            isValid = false;
+        }
+
+        setErrors(tempErrors);
+        return isValid;
+        
+    };
+    
 
     const handleLogin = async () => {
-        if (!email || !password) {
-            Alert.alert('Login Failed', 'Both fields are required');
-            return;
-        }
+        // Validate inputs
+        const isValid = validateInputs();
+        if (!isValid) return;
 
-        if (email === testEmail && password === testPassword) {
-            navigation.replace('DrawerNavigator');
-        } else {
-            Alert.alert('Login Failed', 'Incorrect email or password');
+        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/login`;
+        console.log('Backend URL:', backend_url);
+
+        try {
+            const response = await fetch(backend_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+
+            const data = await response.json();
+            console.log('Response:', data);
+            if (data.error) {
+                Alert.alert("Error", data.error);
+            } else {
+                Alert.alert("Success", "Login successful!");
+                navigation.navigate('DrawerNavigator');
+            }
+        } catch (error) {
+            console.error('Error during login:', error);
+            Alert.alert("Error", "An error occurred while logging in. Please try again.");
         }
+    };
+
+    // Error: Border
+    const getInputStyle = (field) => {
+        return {
+            ...styles.input,
+            borderColor: errors[field] ? Colors.red : Colors.darkBlue,
+        };
+    };
+
+    // Error: Text
+    const getErrorTextStyle = (field) => {
+        return {
+            color: errors[field] ? Colors.red : 'transparent',
+        };
     };
 
     return (
         <ImageBackground 
-            source={require('../assets/login_signup_background.png')}
+            source={require('../assets/login_signup_background.png')}            
             style={styles.background}
         >
             <View style={styles.overlay}>
                 <View style={styles.card}>
                     <Text style={styles.title}>Login</Text>
                     <View style={styles.inputContainer}>
-                        <MaterialIcons name="email" size={24} style={styles.icon}/>
+                        <MaterialIcons name="email" size={24} style={styles.icon} />
                         <TextInput
-                            style={styles.input}
+                            style={getInputStyle('email')}
                             placeholder="Email"
                             value={email}
                             onChangeText={setEmail}
@@ -43,25 +101,27 @@ export default function LoginScreen({ navigation }) {
                             placeholderTextColor={Colors.grey}
                             autoCapitalize="none"
                         />
+                        <Text style={getErrorTextStyle('email')}>{errors.email}</Text>
                     </View>
                     <View style={styles.inputContainer}>
-                        <MaterialIcons name="lock" size={24} style={styles.icon}/>
+                        <MaterialIcons name="lock" size={24} style={styles.icon} />
                         <TextInput
-                            style={styles.input}
+                            style={getInputStyle('password')}
                             placeholder="Password"
                             value={password}
                             onChangeText={setPassword}
                             secureTextEntry
                             placeholderTextColor={Colors.grey}
                         />
+                        <Text style={getErrorTextStyle('password')}>{errors.password}</Text>
                     </View>
                     <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                         <Text style={styles.loginButtonText}>LOGIN</Text>
                     </TouchableOpacity>
                 </View>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-                        <Text style={styles.link}>Not yet registered? SignUp now</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.signupText}>Don't have an account? Sign Up here</Text>
+                </TouchableOpacity>
             </View>
         </ImageBackground>
     );
@@ -108,7 +168,6 @@ const styles = StyleSheet.create({
         left: 12,
         top: 22,
         color: Colors.darkBlue,
-        size: 24,
     },
     loginButton: {
         width: '100%',
@@ -117,14 +176,13 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 50,
+        marginTop: 10,
     },
     loginButtonText: {
         color: '#FFFFFF',
         fontSize: 22,
-
     },
-    link: {
+    signupText: {
         marginTop: 20,
         color: Colors.darkBlue,
     },

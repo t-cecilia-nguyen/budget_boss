@@ -1,11 +1,17 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_db, init_db, close_db
 from routes import home
+import jwt
+import secrets
+import datetime
 
 app = Flask(__name__)
 CORS(app) 
+
+# Generate secret key for JWT
+app.config['SECRET_KEY'] = secrets.token_urlsafe(32) 
 
 # Register blueprints
 app.register_blueprint(home.bp)
@@ -45,6 +51,49 @@ def signup():
         db.commit()
 
         return jsonify({"message": "User created successfully"}), 201
+
+    except Exception as e:
+        print(f"Error: {e}")  # Debug: Print any errors
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/login', methods=['POST'])
+def login():
+    # Debug: Print when route hit
+    print("Login route hit")
+    try:
+        data = request.get_json()
+
+        # Debug: Print the received data
+        print("Received data:", data)
+
+        email = data.get('email')
+        password = data.get('password')
+
+        if not email or not password:
+            return jsonify({"error": "Missing email or password"}), 400
+
+        db = get_db()
+        user = db.execute('''
+            SELECT * FROM users WHERE email = ?
+        ''', (email,)).fetchone()
+
+        if user is None:
+            return jsonify({"error": "Invalid email or password"}), 401
+
+        # Check if password is correct
+        if not check_password_hash(user['password_hash'], password):
+            return jsonify({"error": "Invalid email or password"}), 401
+
+        # Generate JWT token (valid for 1 hour)
+        token = jwt.encode({
+            'user_id': user['id'],
+            'exp': datetime.datetime.now(datetime.timezone.utc)  + datetime.timedelta(hours=1)
+        }, app.config['SECRET_KEY'], algorithm='HS256')
+
+        return jsonify({
+            'message': 'Login successful',
+            'token': token
+        }), 200
 
     except Exception as e:
         print(f"Error: {e}")  # Debug: Print any errors
