@@ -16,6 +16,36 @@ def get_categories():
     return jsonify([dict(c) for c in categories])
 
 
+@bp.route('/categories/create', methods=['POST'])
+def create_category():
+    db = get_db()
+    data = request.get_json()
+
+    # Validate required fields
+    name = data.get('name')
+    description = data.get('description')
+    category_type = data.get('type')
+    img_name = data.get('img_name')
+
+    if not name or not category_type:
+        return jsonify({"error": "Name and type are required fields"}), 400
+
+    try:
+        # Insert into the categories table
+        db.execute(
+            'INSERT INTO categories (name, description, type, img_name) VALUES (?, ?, ?, ?)',
+            (name, description, category_type, img_name)
+        )
+        db.commit()
+        return jsonify({"message": "Category created successfully"}), 201
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
 #http://10.0.2.2:5000/categories/update
 @bp.route('/categories/update', methods=['PUT'])
 def update_category():

@@ -16,9 +16,56 @@ const CreateCategory = ({ navigation }) => {
   // Initialize state for category fields (empty for new category)
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
-  const [categoryImage, setCategoryImage] = useState("default.png");
+  const [categoryType, setCategoryType] = useState("Expense"); //default is Expense
+  const [categoryImage, setCategoryImage] = useState("");
 
-  ////////
+
+
+  /////
+ // Fetch categories after updating one
+ const fetchCategories = async () => {
+  try {
+    const response = await fetch("http://10.0.2.2:5000/categories");
+    const data = await response.json();
+    return data; // Return the updated list of categories
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+};
+
+  const handleCreateCategory = async (newCategory) => {
+    try {
+      const response = await fetch("http://10.0.2.2:5000/categories/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newCategory),
+      });
+  
+      if (response.ok) {
+        console.log("Category created successfully: "+ newCategory.categoryName);
+  
+        // Fetch the updated categories list
+        const updatedList = await fetchCategories();
+        // Navigate back to CategoriesList with the updated list
+        navigation.navigate("CategoriesList", { updatedCategories : updatedList });
+      } else {
+        console.error("Failed to create category:", response.status);
+        alert("Failed to create category. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating category:", error);
+      alert("An error occurred while creating the category. Please try again.");
+    }
+  };
+  
+
+
+
+
+  //////// IMAGE
 
   const uploadImage = async (file) => {
     const formData = new FormData();
@@ -47,7 +94,7 @@ const CreateCategory = ({ navigation }) => {
   ///////////
 
   const handleSave = () => {
-    console.log("New category created:", {
+    console.log("New category to be created:", {
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
@@ -55,10 +102,17 @@ const CreateCategory = ({ navigation }) => {
     });
 
     //@TODO: SAVE TO DATABASE
-    // Navigate back or to another screen after saving
-    setNewCategory(true);
-    navigation.goBack({ newCtegory });
-  };
+    
+    const newCategory = {
+      name: categoryName,
+      description: categoryDescription,
+      type: categoryType,
+      img_name: categoryImage,
+    };
+      handleCreateCategory(newCategory); 
+    };
+  
+  
 
   return (
     <View style={styles.container}>
@@ -96,7 +150,14 @@ const CreateCategory = ({ navigation }) => {
           />
         </View>
       </View>
-      <RadioButton />
+      <RadioButton
+        selectedValue={categoryType}
+        onValueChange={(value) => setCategoryType(value)} // Update categoryType
+        options={[
+          { label: "Income", value: "Income" },
+          { label: "Expense", value: "Expense" },
+        ]}
+      />
 
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>SAVE</Text>

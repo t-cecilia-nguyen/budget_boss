@@ -35,7 +35,7 @@ useEffect(() => {
             ...item,
             img_url: `${basePath}${item.img_name}`,
           }))
-          .filter((item) => item.type === "Expense");
+          .filter((item) => item.type === "Income");
         setCategories(categoriesItems);
       })
       .catch((error) => {
