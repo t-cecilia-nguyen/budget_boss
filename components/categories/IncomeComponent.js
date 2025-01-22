@@ -1,7 +1,9 @@
-import { StyleSheet, Text, View, Dimensions, Image } from "react-native";
+import { StyleSheet, Text, View, Dimensions, Image, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { useNavigation } from "@react-navigation/native";
+
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -9,29 +11,43 @@ const basePath = "http://10.0.2.2:5000/uploads/";
 
 const IncomeComponent = () => {
   const [categories, setCategories] = useState([]);
-  const [newCategory, setNewCategory] = useState();
 
-  useEffect(() => {
+    const navigation = useNavigation();
+  
+    const handleEditPress = (item) => {
+      navigation.navigate("EditCategory", {data: item});
+    };
+
+
+useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = () => {
     fetch("http://10.0.2.2:5000/categories", {
       method: "GET",
     })
       .then((resp) => resp.json())
       .then((data) => {
-        const categoriesItems = data.map((item) => ({
-          ...item,
-          img_url: `${basePath}${item.img_name}`,
-        }))
-        .filter((item) => item.type === "Income");
+        // Use the base path to construct the image URLs
+        const categoriesItems = data
+          .map((item) => ({
+            ...item,
+            img_url: `${basePath}${item.img_name}`,
+          }))
+          .filter((item) => item.type === "Expense");
         setCategories(categoriesItems);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, [newCategory]);
+  };
 
   const renderData = (item) => {
     
     return (
+          <TouchableOpacity onPress={ () => handleEditPress(item)}>
+      
       <View style={styles.itemCard}>
         <View style={styles.itemInfo}>
           <View style={styles.imageBox}>
@@ -50,6 +66,7 @@ const IncomeComponent = () => {
         </View>
         <FontAwesome6 name="greater-than" size={16} color="lightgrey" />
       </View>
+      </TouchableOpacity>
     );
   };
 

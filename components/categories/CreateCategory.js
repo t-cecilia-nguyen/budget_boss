@@ -1,18 +1,24 @@
-
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Image } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 
-const basePath = "http://10.0.2.2:5000/uploads/"; 
+import RadioButton from "./RadioButton";
+
+const basePath = "http://10.0.2.2:5000/uploads/";
 
 const CreateCategory = ({ navigation }) => {
   // Initialize state for category fields (empty for new category)
-  const [categoryName, setCategoryName] = useState('');
-  const [categoryDescription, setCategoryDescription] = useState('');
-  const [categoryType, setCategoryType] = useState('Expense'); // Default to 'Expense'
-  const [categoryImage, setCategoryImage] = useState('default.png');
-  const [newCategory, setNewCategory] = useState(false);
+  const [categoryName, setCategoryName] = useState("");
+  const [categoryDescription, setCategoryDescription] = useState("");
+  const [categoryImage, setCategoryImage] = useState("default.png");
 
-  //////////
+  ////////
 
   const uploadImage = async (file) => {
     const formData = new FormData();
@@ -38,7 +44,7 @@ const CreateCategory = ({ navigation }) => {
     }
   };
 
-///////////
+  ///////////
 
   const handleSave = () => {
     console.log("New category created:", {
@@ -50,8 +56,8 @@ const CreateCategory = ({ navigation }) => {
 
     //@TODO: SAVE TO DATABASE
     // Navigate back or to another screen after saving
-    setNewCategory(true)
-    navigation.goBack( {newCtegory});
+    setNewCategory(true);
+    navigation.goBack({ newCtegory });
   };
 
   return (
@@ -68,7 +74,7 @@ const CreateCategory = ({ navigation }) => {
           ) : (
             <Image
               style={styles.categoryImage}
-              source={require('../../assets/categories/default.png')}
+              source={require("../../assets/categories/default.png")}
               resizeMode="center"
             />
           )}
@@ -77,25 +83,29 @@ const CreateCategory = ({ navigation }) => {
           {/* category name */}
           <TextInput
             style={styles.input}
-            placeholder="Category Name"
+            placeholder="Name"
             value={categoryName}
             onChangeText={(text) => setCategoryName(text)}
           />
           {/* category description */}
           <TextInput
             style={styles.input}
-            placeholder="Category Description"
+            placeholder="Description"
             value={categoryDescription}
             onChangeText={(text) => setCategoryDescription(text)}
           />
         </View>
       </View>
+      <RadioButton />
+
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>SAVE</Text>
       </TouchableOpacity>
     </View>
   );
 };
+
+export default CreateCategory;
 
 const styles = StyleSheet.create({
   container: {
@@ -104,48 +114,43 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   button: {
-    backgroundColor: "#3498db",   
-    paddingVertical: 10,           
-    paddingHorizontal: 20,        
-    borderRadius: 10,              
-    alignItems: "center",          
-    justifyContent: "center",      
-    marginTop: 20,                 //  space between the button and input fields
+    backgroundColor: "#3498db",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20, //  space between the button and input fields
   },
   buttonText: {
-    color: "#fff",                 
-    fontSize: 16,                  
-    fontWeight: "bold",            
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   rowBox: {
-    flexDirection: 'row',
-    width: '100%',
+    flexDirection: "row",
+    width: "100%",
     marginBottom: 20,
   },
   input: {
     height: 40,
-    borderBottomWidth: 1,        
-    borderBottomColor: "lightgray",  
+    borderBottomWidth: 1,
+    borderBottomColor: "lightgray",
     marginBottom: 20,
     paddingLeft: 10,
-    paddingBottom: 5,          
+    paddingBottom: 5,
   },
   imageBox: {
-    width: '30%',
-    height: '90%',
+    width: "30%",
+    height: "90%",
     padding: 10,
   },
   infoBox: {
-    width: '70%',
+    width: "70%",
   },
   categoryImage: {
     width: 80,
     height: 80,
   },
+  radioButton: {},
 });
-
-
-
-
-export default CreateCategory;
-

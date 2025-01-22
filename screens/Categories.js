@@ -17,16 +17,52 @@ import NeedHelp from "../components/categories/NeedHelp";
 
 
 const { width: screenWidth } = Dimensions.get("window");
+const basePath = "http://10.0.2.2:5000/uploads/";
 
-const CategoriesScreen = () => {
+const CategoriesScreen = ({route}) => {
 
   const navigation = useNavigation();
 
   const [selectedButton, setSelectedButton] = useState("Expense");
+  const [categories, setCategories] = useState([]);
 
   const handleCreatePress = () => {
     navigation.navigate("CreateCategory", { type: selectedButton });
   };
+
+
+
+  const fetchCategories = () => {
+    fetch("http://10.0.2.2:5000/categories", {
+      method: "GET",
+    })
+      .then((resp) => resp.json())
+      .then((data) => {
+        // Use the base path to construct the image URLs
+        const categoriesItems = data
+          .map((item) => ({
+            ...item,
+            img_url: `${basePath}${item.img_name}`,
+          }))
+          .filter((item) => item.type === "Expense");
+        setCategories(categoriesItems);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }
+
+  
+    useEffect(() => {
+     // If we received the updated categories list, set it
+     if (route.params?.updatedCategories) {
+      setCategories(route.params.updatedCategories);
+    } else {
+      // Otherwise, fetch the categories again (for initial load)
+      fetchCategories(); 
+    }
+  }, [route.params]);
+  
   return (
     <View style={styles.container}>
       <View style={styles.headerCard}>

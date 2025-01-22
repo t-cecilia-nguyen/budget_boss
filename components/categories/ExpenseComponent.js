@@ -1,28 +1,33 @@
-import { StyleSheet, Text, View, Dimensions, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
 
-
 const { width: screenWidth } = Dimensions.get("window");
 const basePath = "http://10.0.2.2:5000/uploads/";
 
 const ExpenseComponent = () => {
-  
   const [categories, setCategories] = useState([]);
-  const [newCategory, setNewCategory] = useState();
 
   const navigation = useNavigation();
 
-  const handleArrowPress = (item) => {
-    navigation.navigate("EditCategory", {data: item});
+  const handleEditPress = (item) => {
+    navigation.navigate("EditCategory", { data: item });
   };
 
-
-
-
   useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = () => {
     fetch("http://10.0.2.2:5000/categories", {
       method: "GET",
     })
@@ -40,31 +45,31 @@ const ExpenseComponent = () => {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, [newCategory]);
+  };
 
   const renderData = (item) => {
     return (
-      <View style={styles.itemCard}>
-        <View style={styles.itemInfo}>
-          <View style={styles.imageBox}>
-            <Image
-              style={{ width: 35, height: 35 }}
-              resizeMode="center"
-              source={{ uri: item.img_url }}
-            />
+      <TouchableOpacity onPress={() => handleEditPress(item)}>
+        <View style={styles.itemCard}>
+          <View style={styles.itemInfo}>
+            <View style={styles.imageBox}>
+              <Image
+                style={{ width: 35, height: 35 }}
+                resizeMode="center"
+                source={{ uri: item.img_url }}
+              />
+            </View>
+            <View style={styles.itemText}>
+              <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
+              <Text style={{ color: "grey", fontSize: 12 }}>
+                {item.description}
+              </Text>
+            </View>
           </View>
-          <View style={styles.itemText}>
-            <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
-            <Text style={{ color: "grey", fontSize: 12 }}>
-              {item.description}
-            </Text>
-          </View>
-        </View>
 
-        <TouchableOpacity onPress={ () => handleArrowPress(item)}>
           <FontAwesome6 name="greater-than" size={16} color="lightgrey" />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
     );
   };
 
