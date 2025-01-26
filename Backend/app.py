@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from database import get_db, init_db, close_db
+from database import get_db, close_db
 from routes import home, categories
 import jwt
 from database import close_db

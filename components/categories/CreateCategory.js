@@ -12,14 +12,15 @@ import RadioButton from "./RadioButton";
 
 const basePath = "http://10.0.2.2:5000/uploads/";
 
-const CreateCategory = ({ navigation, user_id  }) => {
+const CreateCategory = ({ navigation, route  }) => {
   // Initialize state for category fields (empty for new category)
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
   const [categoryType, setCategoryType] = useState("Expense"); //default is Expense
   const [categoryImage, setCategoryImage] = useState("");
 
-
+  const { user_id } = route.params;
+  console.log("user_id prop: ", user_id)
 
   /////
  // Fetch categories after updating one

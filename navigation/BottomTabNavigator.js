@@ -18,6 +18,7 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 function CategoriesStack() {
+  
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -29,21 +30,24 @@ function CategoriesStack() {
         name="CreateCategory"
         component={CreateCategory}
         options={{
-          headerShown: true, 
+          headerShown: true,
           headerTitle: "New Category",
         }}
       />
-      <Stack.Screen name="EditCategory" component={EditCategory} 
-       options={{
-        headerShown: true, 
-        headerTitle: "Edit Category",
-      }}/>
+      <Stack.Screen
+        name="EditCategory"
+        component={EditCategory}
+        options={{
+          headerShown: true,
+          headerTitle: "Edit Category",
+        }}
+      />
     </Stack.Navigator>
   );
 }
 
-export default function BottomTabNavigator() {
-  return (
+export default function BottomTabNavigator({ route }) {
+   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
         initialRouteName="Categories"

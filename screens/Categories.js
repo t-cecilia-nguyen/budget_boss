@@ -8,6 +8,8 @@ import {
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 import HorizontalLine from "../components/categories/HorizontalLine";
 import CustomButtonTab from "../components/categories/CustomButtonTab";
@@ -21,13 +23,46 @@ const basePath = "http://10.0.2.2:5000/uploads/";
 
 const CategoriesScreen = ({route}) => {
 
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
+
+        if (token) {
+          const response = await fetch(backendUrl, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("User data: ", data);
+            setUserId(data.id);
+    
+          } else {
+            console.error("Failed to fetch user info:", response.statusText);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
   const navigation = useNavigation();
 
   const [selectedButton, setSelectedButton] = useState("Expense");
   const [categories, setCategories] = useState([]);
 
   const handleCreatePress = () => {
-    navigation.navigate("CreateCategory", { type: selectedButton });
+    navigation.navigate("CreateCategory", { user_id: userId, type: selectedButton });
   };
 
 

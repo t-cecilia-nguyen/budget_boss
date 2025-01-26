@@ -51,10 +51,11 @@ export default function LoginScreen({ navigation }) {
 
             if (response.status === 200) {
                 const token = response.data.token;
+
                 // Save token to AsyncStorage
                 await AsyncStorage.setItem('token', token);
                 console.log('Token saved:', token);
-                navigation.navigate('DrawerNavigator', { user_id: userId }); // Navigate to Dashboard
+                navigation.navigate('DrawerNavigator'); // Navigate to Dashboard
             } else {
                 Alert.alert("Error", "An error occurred while logging in. Please try again.");
                 console.error('Login failed:', response.statusText);
