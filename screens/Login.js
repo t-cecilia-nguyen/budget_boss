@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Constants from 'expo-constants';
-
+import axios from 'axios';  
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -39,26 +39,18 @@ export default function LoginScreen({ navigation }) {
         const isValid = validateInputs();
         if (!isValid) return;
 
-        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/login`;
+        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/auth/login`;
         console.log('Backend URL:', backend_url);
 
         try {
-            const response = await fetch(backend_url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
+            const response = await axios.post(backend_url, {
+                email,
+                password,
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                const token = data.token;
-                const userId = data.user_id;
 
+            if (response.status === 200) {
+                const token = response.data.token;
                 // Save token to AsyncStorage
                 await AsyncStorage.setItem('token', token);
                 console.log('Token saved:', token);
