@@ -12,7 +12,7 @@ import RadioButton from "./RadioButton";
 
 const basePath = "http://10.0.2.2:5000/uploads/";
 
-const CreateCategory = ({ navigation }) => {
+const CreateCategory = ({ navigation, user_id  }) => {
   // Initialize state for category fields (empty for new category)
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
@@ -79,6 +79,7 @@ const CreateCategory = ({ navigation }) => {
 
       const data = await response.json();
       console.log("Upload response:", data);
+      setCategoryImage(data.img_name); 
     } catch (error) {
       console.error("Error uploading image:", error);
     }
@@ -98,16 +99,17 @@ const CreateCategory = ({ navigation }) => {
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
-      img_name: categoryImage,
+      img_name: categoryImage || "default.png", // If no image, set default.png
+      user_id: user_id,
     });
 
-    //@TODO: SAVE TO DATABASE
     
     const newCategory = {
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
-      img_name: categoryImage,
+      img_name: categoryImage || "default.png", // Ensure default.png is used if no image is selected
+      user_id: user_id,
     };
       handleCreateCategory(newCategory); 
     };

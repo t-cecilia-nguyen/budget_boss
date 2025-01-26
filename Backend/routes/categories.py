@@ -25,16 +25,29 @@ def create_category():
     name = data.get('name')
     description = data.get('description')
     category_type = data.get('type')
-    img_name = data.get('img_name')
+    img_name = data.get('img_name', 'default.png')
+    user_id = data.get('user_id')
 
-    if not name or not category_type:
+    if not user_id:
+            return jsonify({"error": "Missing user ID"}), 400
+    if not name or not category_type :
         return jsonify({"error": "Name and type are required fields"}), 400
 
+    
+
     try:
+         # Validate user_id exists in the users table
+        user = db.execute('''
+            SELECT * FROM users WHERE user_id = ?
+        ''', (user_id,)).fetchone()
+
+        if user is None:
+            return jsonify({"error": "Invalid user ID"}), 400
+
         # Insert into the categories table
         db.execute(
-            'INSERT INTO categories (name, description, type, img_name) VALUES (?, ?, ?, ?)',
-            (name, description, category_type, img_name)
+            'INSERT INTO categories (user_id, name, description, type, img_name) VALUES (?, ?, ?, ?)',
+            (user_id, name, description, category_type, img_name)
         )
         db.commit()
         return jsonify({"message": "Category created successfully"}), 201
@@ -53,9 +66,19 @@ def update_category():
     data = request.get_json()
 
     # Ensure `id` is provided
-    category_id = data.get('id')
-    if not category_id:
-        return jsonify({"error": "Category ID is required"}), 400
+    category_id = data.get('category_id')
+    user_id = data.get('user_id')
+
+    if not category_id or not user_id:
+        return jsonify({"error": "Category ID and User ID are required"}), 400
+
+    # Check if the category exists and belongs to the user
+    category = db.execute('''
+        SELECT * FROM categories WHERE id = ? AND user_id = ?
+    ''', (category_id, user_id)).fetchone()
+
+    if not category:
+        return jsonify({"error": "Category not found or user does not own this category"}), 404
 
     # Prepare dynamic SQL based on provided fields
     fields = []
@@ -65,6 +88,11 @@ def update_category():
             fields.append(f"{key} = ?")
             values.append(data[key])
 
+    # Check if 'img_name' is not provided and set default value
+    if 'img_name' not in data:
+        fields.append("img_name = ?")
+        values.append("default.png")
+
     if not fields:
         return jsonify({"error": "No fields to update provided"}), 400
 
@@ -72,7 +100,7 @@ def update_category():
     values.append(category_id)
 
     # Build the SQL statement dynamically
-    sql = f"UPDATE categories SET {', '.join(fields)} WHERE id = ?"
+    sql = f"UPDATE categories SET {', '.join(fields)} WHERE categiry_id = ?"
 
     try:
         db.execute(sql, values)

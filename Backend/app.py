@@ -19,9 +19,9 @@ app.config['SECRET_KEY'] = secrets.token_urlsafe(32)
 app.register_blueprint(home.bp)
 app.register_blueprint(categories.bp)
 
-@app.before_request
-def setup():
-    init_db()
+# @app.before_request
+# def setup():
+#     init_db()
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -42,7 +42,7 @@ def signup():
             return jsonify({"error": "Missing required fields"}), 400
 
         password_hash = generate_password_hash(password)
-
+        print(password_hash)
         # Debug: Print data to be inserted
         print(f"Inserting user: {first_name} {last_name} with email {email}")
 
@@ -70,7 +70,7 @@ def login():
         print("Received data:", data)
 
         email = data.get('email')
-        password = data.get('password')
+        password = data.get('password').strip() 
 
         if not email or not password:
             return jsonify({"error": "Missing email or password"}), 400
@@ -79,17 +79,22 @@ def login():
         user = db.execute('''
             SELECT * FROM users WHERE email = ?
         ''', (email,)).fetchone()
-
+       # Debug: Log the keys and values of the user result
+       
         if user is None:
             return jsonify({"error": "Invalid email or password"}), 401
 
+        # Check if password is correct using check_password_hash
+        password_hash = user['password_hash']
+        print(f"Retrieved password hash: {password_hash}")  # Debugging
+
         # Check if password is correct
-        if not check_password_hash(user['password_hash'], password):
+        if not check_password_hash(password_hash, password):
             return jsonify({"error": "Invalid email or password"}), 401
 
         # Generate JWT token (valid for 1 hour)
         token = jwt.encode({
-            'user_id': user['id'],
+            'id': user['id'],
             'exp': datetime.datetime.now(datetime.timezone.utc)  + datetime.timedelta(hours=1)
         }, app.config['SECRET_KEY'], algorithm='HS256')
 
@@ -119,10 +124,10 @@ def get_profile():
         try:
             # Decode the token and verify with secret key
             payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            user_id = payload.get('user_id')
+            id = payload.get('id')
             print(f"Token payload: {payload}")
 
-            if not user_id:
+            if not id:
                 return jsonify({"error": "Invalid token"}), 401
 
             # Fetch user info
@@ -131,7 +136,7 @@ def get_profile():
                 SELECT id, first_name, last_name, email
                 FROM users
                 WHERE id = ?
-            ''', (user_id,)).fetchone()
+            ''', (d,)).fetchone()
 
             if not user:
                 return jsonify({"error": "User not found"}), 404

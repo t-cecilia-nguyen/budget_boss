@@ -2,14 +2,15 @@ import sqlite3
 from flask import g
 import os
 
-DATABASE = os.path.join(os.path.dirname(__file__), 'database.db')
+#DATABASE = os.path.join(os.path.dirname(__file__), 'database.db')
+DATABASE = "./database.db"
 
 print(f"Database path: {DATABASE}")
-
 def get_db():
     try:
         if 'db' not in g:
             g.db = sqlite3.connect(DATABASE)
+
             g.db.row_factory = sqlite3.Row
         return g.db
     except sqlite3.Error as e:
