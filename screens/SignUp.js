@@ -63,7 +63,7 @@ export default function SignUpScreen({ navigation }) {
         const isValid = validateInputs();
         if (!isValid) return;
 
-        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/signup`;
+        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/auth/signup`;
         try {
             const response = await fetch(backend_url, {
                 method: 'POST',

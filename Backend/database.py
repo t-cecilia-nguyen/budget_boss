@@ -4,9 +4,8 @@ import os
 
 DATABASE = os.path.join(os.path.dirname(__file__), 'database.db')
 
-print(f"Database path: {DATABASE}")
-
 def get_db():
+    print("Getting database")
     try:
         if 'db' not in g:
             g.db = sqlite3.connect(DATABASE)
@@ -16,19 +15,8 @@ def get_db():
         print(f"SQLite error: {e}")
         raise
 
-def init_db():
-    db = get_db()
-    db.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL,
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL
-    )''')
-    db.commit()
-
 def close_db(e=None):
+    print("Closing database")
     db = g.pop('db', None)
     if db is not None:
         db.close()

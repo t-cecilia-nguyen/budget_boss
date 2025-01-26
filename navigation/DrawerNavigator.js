@@ -45,7 +45,7 @@ function CustomDrawerContent(props) {
         const fetchUser = async () => {
             try {
                 const token = await AsyncStorage.getItem('token');
-                const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile`;
+                const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
 
                 if (token) {
                     const response = await fetch(backendUrl, {

@@ -39,7 +39,7 @@ export default function LoginScreen({ navigation }) {
         const isValid = validateInputs();
         if (!isValid) return;
 
-        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/login`;
+        const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/auth/login`;
         console.log('Backend URL:', backend_url);
 
         try {
