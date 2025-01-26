@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_db, init_db, close_db
-from routes import home
+from routes import home, categories
 import jwt
 import secrets
 import datetime
@@ -13,8 +13,11 @@ CORS(app)
 # Generate secret key for JWT
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32) 
 
+
+
 # Register blueprints
 app.register_blueprint(home.bp)
+app.register_blueprint(categories.bp)
 
 @app.before_request
 def setup():
@@ -159,4 +162,4 @@ def teardown_db(exception):
     close_db(exception)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='127.0.0.1' , port=5000, debug=True)
