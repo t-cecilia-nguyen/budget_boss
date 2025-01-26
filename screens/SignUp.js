@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, A
 import { Colors } from '../assets/colors';
 import { MaterialIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
+import axios from 'axios';
 
 export default function SignUpScreen({ navigation }) {
     const [firstName, setFirstName] = useState('');
@@ -65,23 +66,15 @@ export default function SignUpScreen({ navigation }) {
 
         const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/auth/signup`;
         try {
-            const response = await fetch(backend_url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    email,
-                    password,
-                }),
+            const response = await axios.post(backend_url, {
+                firstName,
+                lastName,
+                email,
+                password,
             });
 
-            const data = await response.json();
-            console.log('Response:', data);
-            if (data.error) {
-                Alert.alert("Error", data.error);
+            if (response.data.error) {
+                Alert.alert("Error", response.data.error);
             } else {
                 Alert.alert("Success", "User created successfully!");
                 navigation.navigate('Login'); // Navigate to Login
