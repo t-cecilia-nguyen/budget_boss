@@ -5,6 +5,8 @@ from schema.init_db import init_db
 import secrets
 from routes.auth import auth_bp
 from routes.profile import profile_bp
+from routes.transactions import transactions_bp
+
 
 app = Flask(__name__)
 CORS(app) 
@@ -12,9 +14,12 @@ CORS(app)
 # Generate secret key for JWT
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32) 
 
-# Register blueprints
+# Manually Register blueprints
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(profile_bp, url_prefix='/profile')
+app.register_blueprint(transactions_bp, url_prefix='/transactions')
+
+
 
 
 # Close database after each request
