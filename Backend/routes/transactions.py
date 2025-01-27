@@ -51,6 +51,7 @@ def get_transactions():
         ]
         print(f"Transactions: {transactions_list}")
 
+
         return jsonify(transactions_list), 200
 
     except Exception as e:
