@@ -9,12 +9,13 @@ import BottomTabNavigator from './BottomTabNavigator';
 import MyAccount from '../screens/MyAccount';
 import Settings from '../screens/Settings';
 import SignOut from '../screens/SignOut';
+import CreateTransactions from '../screens/CreateTransactions';
 
 const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigator() {
     return (
-        <Drawer.Navigator 
+        <Drawer.Navigator
         initialRouteName="Dashboard"
         screenOptions={{
             headerStyle: {
@@ -28,8 +29,8 @@ export default function DrawerNavigator() {
             drawerActiveTintColor: Colors.accentYellow,
             drawerInactiveTintColor: Colors.greyBlue,
         }}>
-            <Drawer.Screen 
-            name="MyAccount" 
+            <Drawer.Screen
+            name="MyAccount"
             component={MyAccount}
             options={{
                 drawerIcon: ({}) => (
@@ -38,8 +39,19 @@ export default function DrawerNavigator() {
                 headerTitle: () => null,
             }}
             />
-            <Drawer.Screen 
-            name="Dashboard" 
+            <Drawer.Screen
+            name="CreateTransactions"
+            component={CreateTransactions}
+            options={{
+                 drawerIcon: ({}) => (
+                     <MaterialIcons name="add" size={24} color={Colors.grey}/>
+                 ),
+                 headerTitle: () => null,
+                 drawerItemStyle: { display: 'none' },
+            }}
+            />
+            <Drawer.Screen
+            name="Dashboard"
             component={BottomTabNavigator}
             options={{
                 drawerIcon: ({}) => (
@@ -48,9 +60,10 @@ export default function DrawerNavigator() {
                 headerTitle: () => null,
             }}
             />
-            <Drawer.Screen 
-            name="Settings" 
-            component={Settings} 
+
+            <Drawer.Screen
+            name="Settings"
+            component={Settings}
             options={{
                 drawerIcon: ({}) => (
                     <MaterialIcons name="settings" size={24} color={Colors.grey}/>
@@ -58,8 +71,8 @@ export default function DrawerNavigator() {
                 headerTitle: () => null,
             }}
             />
-            <Drawer.Screen 
-            name="SignOut" 
+            <Drawer.Screen
+            name="SignOut"
             component={SignOut}
             options={{
                 drawerIcon: ({}) => (
@@ -71,3 +84,5 @@ export default function DrawerNavigator() {
         </Drawer.Navigator>
     );
 }
+
+
