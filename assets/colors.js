@@ -7,4 +7,5 @@ export const Colors = {
     red: "#F94144", // error, expense
     lightBlue: "#73BFDC", // budget
     grey: "#B0BEC5",
+    darkBlue: "#023047",
 }
