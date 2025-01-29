@@ -23,6 +23,6 @@ VALUES
     (1,'Travel', 'Expense', 'Cash', 'travel.png'),
     (1,'Vacation', 'Expense', 'Cash', 'vacation.png'),
     (1,'Insurance', 'Expense', 'Cash', 'insurance.png'),
-    (1,'Mobile Bill', 'Expense', 'Cash', 'mobile_bill.png'),
+    (1,'Mobile Bill', 'Expense', 'Cash', 'mobile.png'),
     (1,'Internet', 'Expense', 'Cash', 'internet.png'),
     (1,'Sports', 'Expense', 'Cash', 'sports.png');

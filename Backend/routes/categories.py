@@ -6,15 +6,27 @@ bp = Blueprint('categories', __name__)
 
 
 
+# To fetch a specific category based on name: /categories?name=Food
+#To fetch all categories:  /categories
 
 @bp.route('/categories')
 def get_categories():
     db = get_db()
-    # Fetch all rows from a "categories" table
-    categories = db.execute('SELECT * FROM categories').fetchall()
-    # Return JSON response
-    return jsonify([dict(c) for c in categories])
-
+   
+    # Get the category name from query parameters
+    category_name = request.args.get('name')
+    
+    if category_name:
+        # Fetch category based on the name
+        category = db.execute('SELECT * FROM categories WHERE name = ?', (category_name,)).fetchone()
+        if category:
+            return jsonify(dict(category))
+        else:
+            return jsonify({"error": "Category not found"}), 404
+    else:
+        # Fetch all categories if no name is provided
+        categories = db.execute('SELECT * FROM categories').fetchall()
+        return jsonify([dict(c) for c in categories])
 
 @bp.route('/categories/create', methods=['POST'])
 def create_category():
@@ -65,16 +77,17 @@ def update_category():
     db = get_db()
     data = request.get_json()
 
+    print("Data to update: ", data)
     # Ensure `id` is provided
     category_id = data.get('category_id')
-    user_id = data.get('user_id')
+    user_id = data.get('userId')
 
     if not category_id or not user_id:
         return jsonify({"error": "Category ID and User ID are required"}), 400
 
     # Check if the category exists and belongs to the user
     category = db.execute('''
-        SELECT * FROM categories WHERE id = ? AND user_id = ?
+        SELECT * FROM categories WHERE category_id = ? AND user_id = ?
     ''', (category_id, user_id)).fetchone()
 
     if not category:
@@ -100,7 +113,7 @@ def update_category():
     values.append(category_id)
 
     # Build the SQL statement dynamically
-    sql = f"UPDATE categories SET {', '.join(fields)} WHERE categiry_id = ?"
+    sql = f"UPDATE categories SET {', '.join(fields)} WHERE category_id = ?"
 
     try:
         db.execute(sql, values)

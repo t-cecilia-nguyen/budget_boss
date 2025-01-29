@@ -13,10 +13,13 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 const basePath = "http://10.0.2.2:5000/uploads/";
 
 const EditCategory = ({ route, navigation }) => {
-  const { data } = route.params || {};
+  const { data, userId, selected } = route.params || {};
+
+  console.log("userid from edit:", userId);
+  console.log("selectedbutton from edit:", selected);
 
   // Initialize state for category fields
-  const categoryId = data.id;
+  const categoryId = data.category_id;
   const [categoryName, setCategoryName] = useState(data?.name || "");
   const [categoryDescription, setCategoryDescription] = useState(
     data?.description || ""
@@ -26,7 +29,20 @@ const EditCategory = ({ route, navigation }) => {
     data?.img_name || "default.png"
   );
 
-  ////////// Delete
+
+    // Fetch categories after updating one
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("http://10.0.2.2:5000/categories");
+        const data = await response.json();
+        return data; // Return the updated list of categories
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+      }
+    };
+
+  ////////// Delete Category
   const handleDatabaseDelete = async (categoryId) => {
     try {
       const response = await fetch("http://10.0.2.2:5000/categories/delete", {
@@ -34,7 +50,7 @@ const EditCategory = ({ route, navigation }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: categoryId }),
+        body: JSON.stringify({ id: categoryId, userId }),
       });
 
       if (response.ok) {
@@ -70,6 +86,8 @@ const EditCategory = ({ route, navigation }) => {
             // Pass updated categories list back to the parent screen
             navigation.navigate("CategoriesList", {
               updatedCategories: updatedList,
+              userId,
+              selected,
             });
           },
         },
@@ -103,21 +121,12 @@ const EditCategory = ({ route, navigation }) => {
     }
   }, [data]);
 
-  // Fetch categories after updating one
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("http://10.0.2.2:5000/categories");
-      const data = await response.json();
-      return data; // Return the updated list of categories
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      return [];
-    }
-  };
-  //
+
+  // Update Category
   const handleSave = async () => {
     console.log("Category to be updated:", {
-      id: categoryId,
+      category_id: categoryId,
+      userId,
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
@@ -127,7 +136,8 @@ const EditCategory = ({ route, navigation }) => {
     //@TODO: SAVE TO DATABASE
 
     const updatedCategory = {
-      id: categoryId,
+      category_id: categoryId,
+      userId,
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
@@ -151,6 +161,8 @@ const EditCategory = ({ route, navigation }) => {
         // Pass updated categories list back to the parent screen
         navigation.navigate("CategoriesList", {
           updatedCategories: updatedList,
+          userId,
+          selected,
         });
       } else {
         console.error("Failed to update category:", response.status);
@@ -160,9 +172,6 @@ const EditCategory = ({ route, navigation }) => {
       console.error("Error updating category:", error);
       alert("An error occurred while saving changes. Please try again.");
     }
-    navigation.navigate("CategoriesList", {
-      updatedCategories: newCategoriesList,
-    });
   };
 
   return (

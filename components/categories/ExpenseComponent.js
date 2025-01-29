@@ -14,13 +14,13 @@ import { useNavigation } from "@react-navigation/native";
 const { width: screenWidth } = Dimensions.get("window");
 const basePath = "http://10.0.2.2:5000/uploads/";
 
-const ExpenseComponent = () => {
+const ExpenseComponent = ({userId, selected}) => {
   const [categories, setCategories] = useState([]);
 
   const navigation = useNavigation();
 
   const handleEditPress = (item) => {
-    navigation.navigate("EditCategory", { data: item });
+    navigation.navigate("EditCategory", { data: item, userId , selected}); 
   };
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const ExpenseComponent = () => {
         renderItem={({ item }) => {
           return renderData(item);
         }}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.category_id}
       />
     </View>
   );

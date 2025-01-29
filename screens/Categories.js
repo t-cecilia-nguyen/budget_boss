@@ -24,6 +24,19 @@ const basePath = "http://10.0.2.2:5000/uploads/";
 const CategoriesScreen = ({route}) => {
 
   const [userId, setUserId] = useState(null);
+  const [selectedButton, setSelectedButton] = useState("Expense");
+  const navigation = useNavigation();
+  const [categories, setCategories] = useState([]);
+  const {user_Id, selected, updatedCategories } = route.params || {};
+
+
+  useEffect(() => {
+    if (selected === "Income") {
+      setSelectedButton("Income");
+    } else {
+      setSelectedButton("Expense");
+    }
+  }, [selected]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -55,11 +68,7 @@ const CategoriesScreen = ({route}) => {
     };
 
     fetchUser();
-  }, []);
-  const navigation = useNavigation();
-
-  const [selectedButton, setSelectedButton] = useState("Expense");
-  const [categories, setCategories] = useState([]);
+  }, [user_Id]);
 
   const handleCreatePress = () => {
     navigation.navigate("CreateCategory", { user_id: userId, type: selectedButton });
@@ -96,7 +105,7 @@ const CategoriesScreen = ({route}) => {
       // Otherwise, fetch the categories again (for initial load)
       fetchCategories(); 
     }
-  }, [route.params]);
+  }, [updatedCategories]);
   
   return (
     <View style={styles.container}>
@@ -147,8 +156,8 @@ const CategoriesScreen = ({route}) => {
       </View>
       <View style={styles.bodyCard}>
       
-          {selectedButton === "Expense" && <ExpenseComponent />}
-          {selectedButton === "Income" && <IncomeComponent />}
+          {selectedButton === "Expense" && <ExpenseComponent selected="Expense" userId={userId}/>}
+          {selectedButton === "Income" && <IncomeComponent selected="Income" userId={userId}/>}
         
       
       </View>
