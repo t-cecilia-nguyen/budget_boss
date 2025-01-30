@@ -71,7 +71,7 @@ const CategoriesScreen = ({route}) => {
   }, [user_Id]);
 
   const handleCreatePress = () => {
-    navigation.navigate("CreateCategory", { user_id: userId, type: selectedButton });
+    navigation.navigate("CreateCategory", { userId: userId, selected: selectedButton });
   };
 
 

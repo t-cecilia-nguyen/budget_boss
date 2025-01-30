@@ -10,13 +10,17 @@ import {
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 
+
+import IconPicker from "./IconPicker";
+
+
 const basePath = "http://10.0.2.2:5000/uploads/";
 
 const EditCategory = ({ route, navigation }) => {
   const { data, userId, selected } = route.params || {};
 
-  console.log("userid from edit:", userId);
-  console.log("selectedbutton from edit:", selected);
+  // console.log("userid from edit:", userId);
+  // console.log("selectedbutton from edit:", selected);
 
   // Initialize state for category fields
   const categoryId = data.category_id;
@@ -50,7 +54,7 @@ const EditCategory = ({ route, navigation }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: categoryId, userId }),
+        body: JSON.stringify({ id: categoryId, user_id: userId }),
       });
 
       if (response.ok) {
@@ -78,10 +82,9 @@ const EditCategory = ({ route, navigation }) => {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => {
+          onPress: async () => {
             // Perform delete logic
-            // Fetch the updated categories list
-            handleDatabaseDelete(categoryId);
+            await handleDatabaseDelete(categoryId);
             console.log("Category deleted : "+ categoryName);
             // Pass updated categories list back to the parent screen
             navigation.navigate("CategoriesList", {
@@ -141,7 +144,7 @@ const EditCategory = ({ route, navigation }) => {
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
-      img_name: categoryImage,
+      img_name: categoryImage && categoryImage !== "" ? categoryImage : "default.png",
     };
 
     try {
@@ -164,7 +167,12 @@ const EditCategory = ({ route, navigation }) => {
           userId,
           selected,
         });
-      } else {
+      }
+      else if (response.status == 409){
+        console.error("Failed to update category:", response.status);
+        alert("Failed to save changes. Category name already exists");
+      }
+      else {
         console.error("Failed to update category:", response.status);
         alert("Failed to save changes. Please try again.");
       }
@@ -177,8 +185,13 @@ const EditCategory = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.rowBox}>
-        <View style={styles.imageBox}>
-          {/* image */}
+      <IconPicker
+      categoryImage={categoryImage}
+      basePath={basePath}
+      onImageSelect={(selectedImage) => setCategoryImage(selectedImage)}
+      />
+        {/*<View style={styles.imageBox}>
+          {/* image 
           {categoryImage ? (
             <Image
               style={styles.categoryImage}
@@ -192,7 +205,8 @@ const EditCategory = ({ route, navigation }) => {
               resizeMode="center"
             />
           )}
-        </View>
+        </View>*/}
+      
         <View style={styles.infoBox}>
           {/* category name */}
           <TextInput
