@@ -91,7 +91,7 @@ export default ExpenseComponent;
 const styles = StyleSheet.create({
   bodyCard: {
     width: screenWidth - 20,
-    height: 500,
+    height: 550,
     marginVertical: 10,
     marginHorizontal: 10,
     justifyContent: "center",
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     width: "70%",
   },
   imageBox: {
-    height: 40,
-    width: 40,
+    height: 30,
+    width: 30,
   },
 });

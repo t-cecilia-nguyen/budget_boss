@@ -18,7 +18,6 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 function CategoriesStack() {
-  
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -47,10 +46,10 @@ function CategoriesStack() {
 }
 
 export default function BottomTabNavigator({ route }) {
-   return (
+  return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
-        initialRouteName="Categories"
+        initialRouteName="Transactions"
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
