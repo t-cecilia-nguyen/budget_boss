@@ -57,3 +57,49 @@ def get_transactions():
     except Exception as e:
         print(f"Error: {e}")  
         return jsonify({"error": str(e)}), 500
+
+# Create transactions
+@transactions_bp.route('/transactions', methods=['POST'])
+def create_transaction():
+    print("Creating transaction...")
+
+    try:
+        # Extract data from the request
+        data = request.get_json()
+
+        # Ensure necessary fields are present
+        user_id = data.get('user_id')
+        amount = data.get('amount')
+        category = data.get('category')  # Category name
+        type = data.get('type')  # Type could be "income" or "expense"
+        date = data.get('date')  # Format: 'YYYY-MM-DD'
+        note = data.get('note')
+        icon = data.get('icon')  # We will add the icon here later
+
+        if not all([user_id, amount, category, type, date]):
+            return jsonify({"error": "All fields are required"}), 400
+
+        # Fetch the img_name (icon) from the categories table based on the category name
+        db = get_db()
+        category_info = db.execute('''
+            SELECT img_name FROM categories WHERE name = ? AND user_id = ?
+        ''', (category, user_id)).fetchone()
+
+        if not category_info:
+            return jsonify({"error": "Category not found for this user"}), 404
+
+        # Get the icon (img_name) from the category
+        icon = category_info['img_name']
+
+        # Insert transaction into database
+        db.execute('''
+            INSERT INTO transactions (user_id, amount, category, type, date, note, icon)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (user_id, amount, category, type, date, note, icon))
+        db.commit()
+
+        return jsonify({"message": "Transaction created successfully"}), 201
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500

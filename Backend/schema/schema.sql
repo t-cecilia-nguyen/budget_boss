@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     type TEXT NOT NULL CHECK(type IN ('income', 'expense')),
     date TEXT NOT NULL,
     note TEXT,
-    icon TEXT,  
+    icon TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 

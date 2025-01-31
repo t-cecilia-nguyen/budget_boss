@@ -12,7 +12,7 @@ import BottomTabNavigator from './BottomTabNavigator';
 // Import screens
 import MyAccount from '../screens/MyAccount';
 import Settings from '../screens/Settings';
-import SignOut from '../screens/SignOut';
+import CreateTransactions from '../screens/CreateTransactions';
 
 const Drawer = createDrawerNavigator();
 
@@ -63,6 +63,7 @@ function CustomDrawerContent(props) {
                         setUser({
                             name: `${data.firstName} ${data.lastName}`,
                             email: data.email,
+                            id: data.id, // Store the user ID
                         });
                     } else {
                         console.error('Failed to fetch user info:', response.statusText);
@@ -111,25 +112,14 @@ export default function DrawerNavigator() {
             drawerActiveTintColor: Colors.accentYellow,
             drawerInactiveTintColor: Colors.greyBlue,
         }}>
-            <Drawer.Screen 
-            name="MyAccount" 
+            <Drawer.Screen
+            name="My Account"
             component={MyAccount}
             options={{
                 drawerIcon: ({}) => (
                     <MaterialIcons name="account-circle" size={24} color={Colors.grey}/>
                 ),
                 headerTitle: () => null,
-            }}
-            />
-            <Drawer.Screen
-            name="CreateTransactions"
-            component={CreateTransactions}
-            options={{
-                 drawerIcon: ({}) => (
-                     <MaterialIcons name="add" size={24} color={Colors.grey}/>
-                 ),
-                 headerTitle: () => null,
-                 drawerItemStyle: { display: 'none' },
             }}
             />
             <Drawer.Screen
@@ -142,7 +132,17 @@ export default function DrawerNavigator() {
                 headerTitle: () => null,
             }}
             />
-
+            <Drawer.Screen
+            name="Create Transactions"
+            component={CreateTransactions}
+            options={{
+                drawerIcon: ({}) => (
+                    <MaterialIcons name="add" size={24} color={Colors.grey}/>
+                ),
+                headerTitle: () => null,
+                drawerItemStyle: { display: 'none' },
+            }}
+            />
             <Drawer.Screen
             name="Settings"
             component={Settings}
@@ -166,3 +166,28 @@ export default function DrawerNavigator() {
         </Drawer.Navigator>
     );
 }
+
+const styles = StyleSheet.create({
+    profileSection: {
+        alignItems: 'center',
+        paddingVertical: 20,
+        backgroundColor: Colors.darkBlue,
+        borderBottomWidth: 1,
+        borderBottomColor: Colors.greyBlue,
+    },
+    profileImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        marginBottom: 10,
+    },
+    profileName: {
+        fontSize: 18,
+        color: Colors.accentYellow,
+        fontWeight: 'bold',
+    },
+    profileEmail: {
+        fontSize: 14,
+        color: Colors.greyBlue,
+    },
+});

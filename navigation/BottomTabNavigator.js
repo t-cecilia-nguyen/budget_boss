@@ -11,6 +11,7 @@ import Overview from '../screens/Overview';
 import Budgets from '../screens/Budgets';
 import Categories from '../screens/Categories';
 import Reports from '../screens/Reports';
+import CreateTransactions from '../screens/CreateTransactions'
 
 const Tab = createBottomTabNavigator();
 
@@ -88,15 +89,13 @@ export default function BottomTabNavigator() {
             {/* Add button */}
             <TouchableOpacity
                 style={styles.floatingButton}
-                onPress={() => navigation.navigate('CreateTransactions')} // Navigate to the CreateTransactions screen
+                onPress={() => navigation.navigate('Create Transactions')} // Navigate to Create Transactions tab
             >
                 <MaterialIcons name="add" size={30} color={Colors.white} />
             </TouchableOpacity>
         </View>
     );
 }
-
-import CreateTransactions from '../screens/CreateTransactions';
 
 const styles = StyleSheet.create({
     floatingButton: {
