@@ -18,3 +18,16 @@ CREATE TABLE IF NOT EXISTS categories (
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-- DROP TABLE IF EXISTS budgets;
+
+CREATE TABLE IF NOT EXISTS budgets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    amount REAL NOT NULL,
+    category TEXT NOT NULL,
+    notes TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

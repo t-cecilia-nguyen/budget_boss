@@ -9,6 +9,7 @@ from schema.init_db import init_db
 import secrets
 from routes.auth import auth_bp
 from routes.profile import profile_bp
+from routes.budgets import budgets_bp
 
 app = Flask(__name__)
 CORS(app) 
@@ -22,6 +23,7 @@ app.register_blueprint(home.bp)
 app.register_blueprint(categories.bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(profile_bp, url_prefix='/profile')
+app.register_blueprint(budgets_bp, url_prefix='/budgets')
 
 
 # Close database after each request
