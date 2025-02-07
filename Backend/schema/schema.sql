@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL
 );
 
-<<<<<<< HEAD
 
 CREATE TABLE IF NOT EXISTS transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +30,6 @@ VALUES
     (1, 150.0, 'Dining Out', 'expense', '2025-01-15', 'Lunch with friends', 'https://media.istockphoto.com/id/1267161539/vector/meal-breaks-vector-line-icon-simple-thin-line-icon-premium-quality-design-element.jpg?s=612x612&w=0&k=20&c=9RNCS0uQvtbUGXqnmK1slk2y4rOOkJlE8bJ2W2qW9tY='),
     (1, 100.0, 'Freelance Work', 'income', '2025-01-20', 'Payment for freelance project', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbwVefKlscDH1ffNFGLeWv9W0WUXWZgxwq4w&s'),
     (1, 50.0, 'Entertainment', 'expense', '2025-01-25', 'Movie night with family', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaZ1hdffCPv9apz2ovZydUT8VYCRg0GJU8Kw&s');
-=======
 --DROP TABLE IF EXISTS categories;
 CREATE TABLE IF NOT EXISTS categories (
     category_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,4 +40,3 @@ CREATE TABLE IF NOT EXISTS categories (
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
->>>>>>> b1562a15f9658298bb0fd6eb8dddc2129015c93e

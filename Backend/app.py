@@ -18,14 +18,11 @@ CORS(app)
 # Generate secret key for JWT
 app.config['SECRET_KEY'] = secrets.token_urlsafe(32) 
 
-<<<<<<< HEAD
 # Manually Register blueprints
-=======
 
 # Register blueprints
 app.register_blueprint(home.bp)
 app.register_blueprint(categories.bp)
->>>>>>> b1562a15f9658298bb0fd6eb8dddc2129015c93e
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(profile_bp, url_prefix='/profile')
 app.register_blueprint(transactions_bp, url_prefix='/transactions')
