@@ -6,12 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
 import Constants from 'expo-constants';
 
-// Import bottom tabs
+// Import navigators
 import BottomTabNavigator from './BottomTabNavigator';
+import SettingsStackNavigator from './SettingsNavigator';
 
 // Import screens
 import MyAccount from '../screens/MyAccount';
-import Settings from '../screens/Settings';
 
 const Drawer = createDrawerNavigator();
 
@@ -132,7 +132,7 @@ export default function DrawerNavigator() {
             />
             <Drawer.Screen 
             name="Settings" 
-            component={Settings} 
+            component={SettingsStackNavigator} 
             options={{
                 drawerIcon: ({}) => (
                     <MaterialIcons name="settings" size={24} color={Colors.grey}/>
