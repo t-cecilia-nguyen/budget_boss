@@ -10,12 +10,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Colors } from "../assets/colors";
 import Constants from "expo-constants";
 
-// Import bottom tabs
+// Import navigators
 import BottomTabNavigator from "./BottomTabNavigator";
+import SettingsStackNavigator from './SettingsNavigator';
 
 // Import screens
-import MyAccount from "../screens/MyAccount";
-import Settings from "../screens/Settings";
+import MyAccount from '../screens/MyAccount';
 
 const Drawer = createDrawerNavigator();
 
