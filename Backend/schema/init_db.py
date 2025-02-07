@@ -46,3 +46,6 @@ def init_db():
 
     finally:
         connection.close()
+
+if __name__ == "__main__":
+    init_db()
