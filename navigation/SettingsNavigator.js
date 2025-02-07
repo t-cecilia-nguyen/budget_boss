@@ -12,8 +12,8 @@ const Stack = createStackNavigator();
 
 export default function SettingsStackNavigator() {
     return (
-        <Stack.Navigator initialRouteName="Settings">
-            <Stack.Screen name="Settings" component={Settings} options={{ headerShown: false }}/>
+        <Stack.Navigator initialRouteName="SettingsNav">
+            <Stack.Screen name="SettingsNav" component={Settings} options={{ headerShown: false }}/>
             <Stack.Screen name="LoginSecurity" component={LoginSecurity} options={{ headerShown: false }}/>
             <Stack.Screen name="HelpSupport" component={HelpSupport} options={{ headerShown: false }}/>
             <Stack.Screen name="ContactUs" component={ContactUs} options={{ headerShown: false }}/>
