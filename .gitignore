@@ -31,9 +31,11 @@ yarn-error.*
 
 # local env files
 .env*.local
+.venv/
 
 # typescript
 *.tsbuildinfo
 
 # database
 database.db
+
