@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "budget_boss",
-    "slug": "budget_boss",
+    "name": "my-project",
+    "slug": "my-project",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,6 +23,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "API_BACKEND_URL": "http://10.0.2.2:5000"
     }
   }
 }
