@@ -1,0 +1,324 @@
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TextInput, Alert, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+const BudgetScreen = ({ navigation }) => {
+
+    // States
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [amount, setAmount] = useState('');
+    const [category, setCategory] = useState('');
+    const [notes, setNotes] = useState('');
+    const [token, setToken] = useState('');
+    const [startDatePicker, setStartDatePicker] = useState('');
+    const [endDatePicker, setEndDatePicker] = useState('');
+    const [categories, setCategories] = useState([]);
+
+    // Retrieve user token
+    useEffect(() => {
+        const getUserId = async () => {
+            try {
+                const storedToken = await AsyncStorage.getItem('token');
+                
+                if (!storedToken) {
+                    console.log("No token could be found.");
+                    return;
+                }
+                // Debug log
+                //console.log("Stored token:", storedToken);
+                setToken(storedToken);
+            } catch (error) {
+                console.error("Error retrieving token:", error);
+            }
+        };
+
+        getUserId();
+    }, []);
+
+    // Get category names 
+    // Will eventually update this to only pull category names labeled as an expense rather than ALL
+    useEffect(() => {
+        const getCategories = async () => {
+
+            if (!token) return;
+
+            try {
+                const response = await axios.get('http://10.0.2.2:5000/categories', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                // Debug API response
+                //console.log('API response:', response.data);
+
+                if (response.status === 200) {
+                    const categoryNames = response.data.map(cat => cat.name);
+                    setCategories(categoryNames);
+                } else {
+                    Alert.alert('Error', 'Failed to fetch categories for form.');
+                }
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                Alert.alert('Error', 'An error has occured while fetching categories.');
+            }
+        };
+
+        getCategories();
+    }, [token]);
+
+
+    // Form validation checks
+    const validateForm = () => {
+        
+        // If missing fields
+        if (!startDate || !endDate || !amount || !category) {
+            Alert.alert('Validation Error', 'Please fill in all required fields.');
+            return false;
+        }
+
+        // If start date is not within the same month and year as end date
+        if (startDate.getMonth() !== endDate.getMonth() || startDate.getFullYear() !== endDate.getFullYear()) {
+            Alert.alert('Validation Error', 'Start and end dates must be within the same month range.');
+            return false;
+        }
+
+        // If amount is not a positive number
+        if (isNaN(amount) || parseFloat(amount) <= 0) {
+            Alert.alert('Validation Error', 'Please enter a valid number that is greater than zero.');
+            return false;
+        }
+
+        
+        return true;
+    };
+
+    // Form submission
+    const handleSubmit = async () => {
+        
+        if (!validateForm()) return;
+
+        try {
+            
+            const budgetData = {
+                startDate: startDate.toISOString().split('T')[0],
+                endDate: endDate.toISOString().split('T')[0],
+                amount: parseFloat(amount),
+                category,
+                notes,
+            };
+
+            const response = await axios.post('http://10.0.2.2:5000/budgets/create', budgetData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            if (response.status === 201) {
+                Alert.alert('Success', response.data.message)
+
+                // Navigates to budget summary after success
+                navigation.navigate('BudgetSummary');
+            } else {
+                Alert.alert('Error', response.data.error || 'An error has occured.'); 
+            }
+        } catch (error) {
+            console.error('Error:', error)
+            Alert.alert('Error', 'An error occured while submitting the form.');
+        }
+    };
+
+    return (
+        <View style={styles.container}>
+            <Text style={styles.title}>Create a Budget</Text>
+
+            <View style={styles.formGroup}>
+                <Text style={styles.label}>Start Date:</Text>
+                    <TouchableOpacity onPress={() => setStartDatePicker(true)} style={styles.inputButton}>
+                        <Text style={styles.inputText}>
+                            {startDate ? startDate.toISOString().split('T')[0] : 'Select Start Date'}
+                        </Text>
+                    </TouchableOpacity>
+                    {startDatePicker && (
+                        <DateTimePicker
+                            value={startDate || new Date()}
+                            mode="date"
+                            display="default"
+                            onChange={(event, selectedDate) => {
+                                setStartDatePicker(false);
+                                if (selectedDate) setStartDate(selectedDate);
+                            }}
+                        />
+                    )}  
+            </View>
+
+            <View style={styles.formGroup}>
+                <Text style={styles.label}>End Date:</Text>
+                <TouchableOpacity onPress={() => setEndDatePicker(true)} style={styles.inputButton}>
+                    <Text style={styles.inputText}>
+                        {endDate ? endDate.toISOString().split('T')[0] : 'Select End Date'}
+                    </Text>
+                </TouchableOpacity>
+                {endDatePicker && (
+                    <DateTimePicker
+                        value={endDate || new Date()}
+                        mode="date"
+                        display="default"
+                        onChange={(event, selectedDate) => {
+                            setEndDatePicker(false);
+                            if (selectedDate) setEndDate(selectedDate);
+                        }}
+                    />
+                )}         
+            </View>
+            
+            <View style={styles.formGroup}>
+                <Text style={styles.label}>Amount:</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Amount"
+                    keyboardType="numeric"
+                    value={amount}
+                    onChangeText={setAmount}
+                />
+            </View>
+
+            <View style={styles.formGroup}>
+                <Text style={styles.label}>Category:</Text>
+                <View style={styles.pickerWrapper}>
+                    <Picker style={styles.picker} selectedValue={category} onValueChange={(itemValue) => setCategory(itemValue)}>
+                        <Picker.Item label="Select Category" value="" />
+                        {categories.map((categoryName, index) => (
+                            <Picker.Item key={index} label={categoryName} value={categoryName} />
+                        ))}
+                    </Picker>
+                </View>
+            </View>
+
+            <View style={styles.formGroup}>
+                <Text style={styles.label}>Notes:</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Notes"
+                    value={notes}
+                    onChangeText={setNotes}
+                />
+            </View>
+            <View style={styles.buttonGroup}>
+                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+                    <Text style={styles.buttonText}>Submit Budget</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('BudgetSummary')}>
+                    <Text style={styles.buttonText}>Your Budgets Summary</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+};
+
+
+// Styling 
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+        backgroundColor: 'white'    
+    },
+    
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+
+    formGroup: {
+        marginBottom: 10,
+        alignItems: 'center',
+        flexDirection: 'row',
+    },
+
+    label: {
+        fontSize: 20,
+        color: 'black',
+        marginRight: 10,
+        width: 100,
+    },
+    
+    input: {
+        flex: 1,
+        height: 60,
+        borderColor: '#277DA1',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        backgroundColor: 'white',
+        fontSize: 18,
+    },
+
+    pickerWrapper: {
+        flex: 1,
+        borderColor: '#277DA1',
+        borderWidth: 1,
+        borderRadius: 5,
+        backgroundColor: 'white',
+        height: 60,
+        justifyContent: 'center',
+    },
+
+    picker: {
+        flex: 1,
+        height: 60,
+        fontSize: 18,
+        lineHeight: 0,
+        textAlign: 'left',
+        color: 'black',
+        paddingVertical: 0,
+    },
+
+    inputButton: {
+        height: 60,
+        justifyContent: 'center',
+        borderColor: '#277DA1',
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        backgroundColor: 'white',
+        flexShrink: 1,
+        width: '100%'
+    },
+
+    inputText: {
+        color: 'black',
+        fontSize: 18,
+    },
+
+    buttonGroup: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
+
+    button: {
+        flex: 1,
+        backgroundColor:  '#66B2FF',
+        paddingVertical: 10,
+        marginHorizontal: 5,
+        borderRadius: 5,
+    },
+
+    buttonText: {
+        color: 'white',
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+});
+
+export default BudgetScreen;
