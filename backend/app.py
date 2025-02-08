@@ -3,12 +3,17 @@ from flask_cors import CORS
 from database import close_db
 from routes import home, categories
 from schema.init_db import init_db
+import os
+import sqlite3
+from database import close_db
 import secrets
 from routes.auth import auth_bp
 from routes.profile import profile_bp
 from routes.budgets import budgets_bp
 from routes.transactions import transactions_bp
 
+DATABASE = os.path.join(os.path.dirname(__file__), 'database.db')
+print("Current Working Directory:", os.getcwd())
 
 app = Flask(__name__)
 CORS(app) 
@@ -29,6 +34,15 @@ app.register_blueprint(transactions_bp, url_prefix='/transactions')
 def teardown_db(exception):
     close_db(exception)
 
+def verify_tables():
+    connection = sqlite3.connect(DATABASE)
+    cursor = connection.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    connection.close()
+    print("Existing Tables:", tables)
+
 if __name__ == '__main__':
-    init_db()  # Initialize
-    app.run(host='127.0.0.1' , port=5000, debug=True)
+    # init_db()
+    # verify_tables() 
+    app.run(host='127.0.0.1', port=5000, debug=True)
