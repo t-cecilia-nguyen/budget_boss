@@ -48,8 +48,10 @@ export default function LoginScreen({ navigation }) {
                 password,
             });
 
+
             if (response.status === 200) {
                 const token = response.data.token;
+
                 // Save token to AsyncStorage
                 await AsyncStorage.setItem('token', token);
                 console.log('Token saved:', token);

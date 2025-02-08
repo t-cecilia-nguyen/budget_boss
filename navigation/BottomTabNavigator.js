@@ -1,23 +1,56 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Colors } from '../assets/colors';
-import { TouchableOpacity, View, StyleSheet } from 'react-native';
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { MaterialIcons } from "@expo/vector-icons";
+import { Colors } from "../assets/colors";
+import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { createStackNavigator } from "@react-navigation/stack";
 
 // Import tabs
 import Transactions from '../screens/Transactions';
 import Overview from '../screens/Overview';
-import Budgets from '../screens/Budgets';
+import BudgetsStackNavigator from './BudgetsStackNavigator';
 import Categories from '../screens/Categories';
 import Reports from '../screens/Reports';
+import CreateCategory from "../components/categories/CreateCategory";
+import EditCategory from "../components/categories/EditCategory";
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+function CategoriesStack() {
+  
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="CategoriesList"
+        component={Categories}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CreateCategory"
+        component={CreateCategory}
+        options={{
+          headerShown: true,
+          headerTitle: "New Category",
+        }}
+      />
+      <Stack.Screen
+        name="EditCategory"
+        component={EditCategory}
+        options={{
+          headerShown: true,
+          headerTitle: "Edit Category",
+        }}
+      />
+    </Stack.Navigator>
+  );
+}
 
 export default function BottomTabNavigator() {
     return (
         <View style={{ flex: 1 }}>
             <Tab.Navigator 
-                initialRouteName="Transactions" 
+                initialRouteName="Categories" 
                 screenOptions={{ 
                     headerShown: false, 
                     tabBarStyle: {
@@ -50,7 +83,7 @@ export default function BottomTabNavigator() {
                     }} />
                 <Tab.Screen 
                     name="Budgets" 
-                    component={Budgets} 
+                    component={BudgetsStackNavigator} 
                     options={{
                         tabBarIcon: ({focused}) => (
                             <MaterialIcons 
@@ -61,7 +94,7 @@ export default function BottomTabNavigator() {
                     }} />
                 <Tab.Screen 
                     name="Categories" 
-                    component={Categories} 
+                    component={CategoriesStack} 
                     options={{
                         tabBarIcon: ({focused}) => (
                             <MaterialIcons 
@@ -91,16 +124,16 @@ export default function BottomTabNavigator() {
 }
 
 const styles = StyleSheet.create({
-    floatingButton: {
-        position: 'absolute',
-        right: 10,
-        bottom: 60,
-        backgroundColor: Colors.accentYellow,
-        width: 50,
-        height: 50,
-        borderRadius: '50%',
-        justifyContent: 'center',
-        alignItems: 'center',
-        elevation: 5,
-    },
+  floatingButton: {
+    position: "absolute",
+    right: 10,
+    bottom: 60,
+    backgroundColor: Colors.accentYellow,
+    width: 50,
+    height: 50,
+    borderRadius: "50%",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
+  },
 });
