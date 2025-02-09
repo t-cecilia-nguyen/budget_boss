@@ -18,7 +18,6 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 function CategoriesStack() {
-  
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -46,81 +45,92 @@ function CategoriesStack() {
   );
 }
 
-export default function BottomTabNavigator() {
-    return (
-        <View style={{ flex: 1 }}>
-            <Tab.Navigator 
-                initialRouteName="Categories" 
-                screenOptions={{ 
-                    headerShown: false, 
-                    tabBarStyle: {
-                        backgroundColor: Colors.darkBlue,
-                    },
-                    tabBarActiveTintColor: Colors.accentYellow, 
-                    tabBarInactiveTintColor: Colors.grey, 
-                }}>
-                <Tab.Screen 
-                    name="Transactions" 
-                    component={Transactions}
-                    options={{
-                        tabBarIcon: ({focused}) => (
-                            <MaterialIcons 
-                                name="view-list" 
-                                size={28} 
-                                color={focused ? Colors.accentYellow : Colors.grey} />
-                        ),
-                    }} />
-                <Tab.Screen 
-                    name="Overview" 
-                    component={Overview} 
-                    options={{
-                        tabBarIcon: ({focused}) => (
-                            <MaterialIcons 
-                                name="pie-chart" 
-                                size={28} 
-                                color={focused ? Colors.accentYellow : Colors.grey} />
-                        ),
-                    }} />
-                <Tab.Screen 
-                    name="Budgets" 
-                    component={BudgetsStackNavigator} 
-                    options={{
-                        tabBarIcon: ({focused}) => (
-                            <MaterialIcons 
-                                name="currency-exchange" 
-                                size={28} 
-                                color={focused ? Colors.accentYellow : Colors.grey} />
-                        ),
-                    }} />
-                <Tab.Screen 
-                    name="Categories" 
-                    component={CategoriesStack} 
-                    options={{
-                        tabBarIcon: ({focused}) => (
-                            <MaterialIcons 
-                                name="category" 
-                                size={30} 
-                                color={focused ? Colors.accentYellow : Colors.grey} />
-                        ),
-                    }} />
-                <Tab.Screen 
-                    name="Reports" 
-                    component={Reports} 
-                    options={{
-                        tabBarIcon: ({focused}) => (
-                            <MaterialIcons 
-                                name="stacked-line-chart" 
-                                size={28} 
-                                color={focused ? Colors.accentYellow : Colors.grey} />
-                        ),
-                    }} />
-            </Tab.Navigator>
-            {/* Add button */}
-            <TouchableOpacity style={styles.floatingButton}>
-                <MaterialIcons name="add" size={30} color={Colors.white} />
-            </TouchableOpacity>
-        </View>
-    );
+export default function BottomTabNavigator({ route }) {
+  return (
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        initialRouteName="Transactions"
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: Colors.darkBlue,
+          },
+          tabBarActiveTintColor: Colors.accentYellow,
+          tabBarInactiveTintColor: Colors.grey,
+        }}
+      >
+        <Tab.Screen
+          name="Transactions"
+          component={Transactions}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <MaterialIcons
+                name="view-list"
+                size={28}
+                color={focused ? Colors.accentYellow : Colors.grey}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Overview"
+          component={Overview}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <MaterialIcons
+                name="pie-chart"
+                size={28}
+                color={focused ? Colors.accentYellow : Colors.grey}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Budgets"
+          component={Budgets}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <MaterialIcons
+                name="currency-exchange"
+                size={28}
+                color={focused ? Colors.accentYellow : Colors.grey}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Categories"
+          component={CategoriesStack}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <MaterialIcons
+                name="category"
+                size={30}
+                color={focused ? Colors.accentYellow : Colors.grey}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Reports"
+          component={Reports}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <MaterialIcons
+                name="stacked-line-chart"
+                size={28}
+                color={focused ? Colors.accentYellow : Colors.grey}
+              />
+            ),
+          }}
+        />
+      </Tab.Navigator>
+      {/* Add button */}
+      <TouchableOpacity style={styles.floatingButton}>
+        <MaterialIcons name="add" size={30} color={Colors.white} />
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

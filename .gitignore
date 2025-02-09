@@ -80,3 +80,6 @@ yarn-error.*
 *.tsbuildinfo
 
 *.idea/
+
+# venv
+.venv/

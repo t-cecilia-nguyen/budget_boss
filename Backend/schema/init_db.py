@@ -9,8 +9,8 @@ SCHEMA = os.path.join(os.path.dirname(__file__), 'schema.sql')
 def init_db():
     try:
         # Debug: Print paths
-        print(f"Database path: {os.path.abspath(DATABASE)}")
-        print(f"Schema path: {os.path.abspath(SCHEMA)}")
+        #print(f"Database path: {os.path.abspath(DATABASE)}")
+        #print(f"Schema path: {os.path.abspath(SCHEMA)}")
 
         # Connect to SQLite
         connection = sqlite3.connect(DATABASE)
@@ -25,7 +25,7 @@ def init_db():
             sql_script = f.read()
             print("Executing schema.sql:")
             # Debug: Print script
-            print(sql_script)
+            #print(sql_script)
         
             connection.executescript(sql_script)
             connection.commit()
@@ -47,3 +47,6 @@ def init_db():
 
     finally:
         connection.close()
+
+if __name__ == "__main__":
+    init_db()

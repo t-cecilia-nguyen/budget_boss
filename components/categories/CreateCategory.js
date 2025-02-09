@@ -9,6 +9,8 @@ import {
 } from "react-native";
 
 import RadioButton from "./RadioButton";
+import IconPicker from "./IconPicker";
+
 
 const basePath = "http://10.0.2.2:5000/uploads/";
 
@@ -19,8 +21,10 @@ const CreateCategory = ({ navigation, route  }) => {
   const [categoryType, setCategoryType] = useState("Expense"); //default is Expense
   const [categoryImage, setCategoryImage] = useState("");
 
-  const { user_id } = route.params;
-  console.log("user_id prop: ", user_id)
+  const { userId, selected } = route.params || {};
+
+  // console.log("userid from create:", userId);
+  // console.log("selectedbutton from create:", selected);
 
   /////
  // Fetch categories after updating one
@@ -34,6 +38,8 @@ const CreateCategory = ({ navigation, route  }) => {
     return [];
   }
 };
+
+/// CREATE NEW CATGORY /////
 
   const handleCreateCategory = async (newCategory) => {
     try {
@@ -51,8 +57,17 @@ const CreateCategory = ({ navigation, route  }) => {
         // Fetch the updated categories list
         const updatedList = await fetchCategories();
         // Navigate back to CategoriesList with the updated list
-        navigation.navigate("CategoriesList", { updatedCategories : updatedList });
-      } else {
+        navigation.navigate("CategoriesList", {
+          updatedCategories: updatedList,
+          userId,
+          selected,
+        });      
+      } 
+      else if (response.status == 409){
+        console.error("Failed to create category:", response.status);
+        alert("Failed to create category. Category name already exists");
+      }
+      else {
         console.error("Failed to create category:", response.status);
         alert("Failed to create category. Please try again.");
       }
@@ -64,44 +79,13 @@ const CreateCategory = ({ navigation, route  }) => {
   
 
 
-
-
-  //////// IMAGE
-
-  const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("http://10.0.2.2:5000/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-      console.log("Upload response:", data);
-      setCategoryImage(data.img_name); 
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
-  };
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      uploadImage(file);
-    }
-  };
-
-  ///////////
-
   const handleSave = () => {
     console.log("New category to be created:", {
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
-      img_name: categoryImage || "default.png", // If no image, set default.png
-      user_id: user_id,
+      img_name: categoryImage && categoryImage !== "" ? categoryImage : "default.png",
+      userId,
     });
 
     
@@ -109,33 +93,23 @@ const CreateCategory = ({ navigation, route  }) => {
       name: categoryName,
       description: categoryDescription,
       type: categoryType,
-      img_name: categoryImage || "default.png", // Ensure default.png is used if no image is selected
-      user_id: user_id,
+      img_name: categoryImage && categoryImage !== "" ? categoryImage : "default.png",
+      user_id: userId,
     };
       handleCreateCategory(newCategory); 
     };
   
-  
+
 
   return (
     <View style={styles.container}>
       <View style={styles.rowBox}>
-        <View style={styles.imageBox}>
-          {/* image */}
-          {categoryImage ? (
-            <Image
-              style={styles.categoryImage}
-              source={{ uri: `${basePath}${categoryImage}` }}
-              resizeMode="center"
-            />
-          ) : (
-            <Image
-              style={styles.categoryImage}
-              source={require("../../assets/categories/default.png")}
-              resizeMode="center"
-            />
-          )}
-        </View>
+      <IconPicker
+      categoryImage={categoryImage}
+      basePath={basePath}
+      onImageSelect={(selectedImage) => setCategoryImage(selectedImage)}
+      />
+        
         <View style={styles.infoBox}>
           {/* category name */}
           <TextInput
@@ -194,7 +168,7 @@ const styles = StyleSheet.create({
   rowBox: {
     flexDirection: "row",
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   input: {
     height: 40,
