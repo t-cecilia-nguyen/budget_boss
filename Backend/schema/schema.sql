@@ -1,4 +1,4 @@
--- DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS transactions;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -27,8 +27,7 @@ VALUES
     (1, 200.0, 'Groceries', 'expense', '2025-01-11', 'Weekly grocery shopping', 'https://cdn-icons-png.flaticon.com/512/1261/1261163.png'),
     (1, 150.0, 'Dining Out Again', 'expense', '2025-01-15', 'Dinner at a fancy restaurant', 'https://media.istockphoto.com/id/1267161539/vector/meal-breaks-vector-line-icon-simple-thin-line-icon-premium-quality-design-element.jpg?s=612x612&w=0&k=20&c=9RNCS0uQvtbUGXqnmK1slk2y4rOOkJlE8bJ2W2qW9tY=');
 
-
---DROP TABLE IF EXISTS categories;
+DROP TABLE IF EXISTS categories;
 CREATE TABLE IF NOT EXISTS categories (
     category_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
