@@ -87,7 +87,7 @@ export default function BottomTabNavigator({ route }) {
         />
         <Tab.Screen
           name="Budgets"
-          component={Budgets}
+          component={BudgetsStackNavigator}
           options={{
             tabBarIcon: ({ focused }) => (
               <MaterialIcons
