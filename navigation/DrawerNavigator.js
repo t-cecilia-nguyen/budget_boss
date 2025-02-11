@@ -155,6 +155,7 @@ export default function DrawerNavigator() {
            headerTitle: () => null,
            drawerItemStyle: { display: 'none' },
          }}
+         initialParams={{ userId }}
        />
       <Drawer.Screen
         name="Settings"

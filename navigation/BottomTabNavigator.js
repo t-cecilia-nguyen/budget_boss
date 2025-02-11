@@ -4,11 +4,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Colors } from "../assets/colors";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialIcons } from '@expo/vector-icons';
-import { Colors } from '../assets/colors';
-import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // <-- Import useNavigation
 
 // Import tabs
@@ -52,92 +47,6 @@ function CategoriesStack() {
   );
 }
 
-export default function BottomTabNavigator({ route }) {
-  return (
-    <View style={{ flex: 1 }}>
-      <Tab.Navigator
-        initialRouteName="Transactions"
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: {
-            backgroundColor: Colors.darkBlue,
-          },
-          tabBarActiveTintColor: Colors.accentYellow,
-          tabBarInactiveTintColor: Colors.grey,
-        }}
-      >
-        <Tab.Screen
-          name="Transactions"
-          component={Transactions}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <MaterialIcons
-                name="view-list"
-                size={28}
-                color={focused ? Colors.accentYellow : Colors.grey}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Overview"
-          component={Overview}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <MaterialIcons
-                name="pie-chart"
-                size={28}
-                color={focused ? Colors.accentYellow : Colors.grey}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Budgets"
-          component={BudgetsStackNavigator}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <MaterialIcons
-                name="currency-exchange"
-                size={28}
-                color={focused ? Colors.accentYellow : Colors.grey}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Categories"
-          component={CategoriesStack}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <MaterialIcons
-                name="category"
-                size={30}
-                color={focused ? Colors.accentYellow : Colors.grey}
-              />
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Reports"
-          component={Reports}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <MaterialIcons
-                name="stacked-line-chart"
-                size={28}
-                color={focused ? Colors.accentYellow : Colors.grey}
-              />
-            ),
-          }}
-        />
-      </Tab.Navigator>
-      {/* Add button */}
-      <TouchableOpacity style={styles.floatingButton}>
-        <MaterialIcons name="add" size={30} color={Colors.white} />
-      </TouchableOpacity>
-    </View>
-  );
 export default function BottomTabNavigator() {
     const navigation = useNavigation(); // <-- Use useNavigation hook
 
@@ -177,7 +86,7 @@ export default function BottomTabNavigator() {
                     }} />
                 <Tab.Screen
                     name="Budgets"
-                    component={Budgets}
+                    component={BudgetsStackNavigator}
                     options={{
                         tabBarIcon: ({focused}) => (
                             <MaterialIcons
@@ -188,7 +97,7 @@ export default function BottomTabNavigator() {
                     }} />
                 <Tab.Screen
                     name="Categories"
-                    component={Categories}
+                    component={CategoriesStack}
                     options={{
                         tabBarIcon: ({focused}) => (
                             <MaterialIcons

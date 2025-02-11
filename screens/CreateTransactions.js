@@ -8,22 +8,23 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DropDownPicker from 'react-native-dropdown-picker'; // Import DropDownPicker
+import DropDownPicker from 'react-native-dropdown-picker';
 
 const CreateTransactions = () => {
-  const [selectedTab, setSelectedTab] = useState('Expense');
+  const [selectedTab, setSelectedTab] = useState('Expense'); // Default to Expense tab
   const [date, setDate] = useState(moment().format('YYYY-MM-DD'));
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState(null); // Set initial category to null
+  const [category, setCategory] = useState(null);
   const [note, setNote] = useState('');
-  const [categories, setCategories] = useState([]); // For storing categories
+  const [categories, setCategories] = useState([]);
+  const [allCategories, setAllCategories] = useState([]); // Store both Income and Expense categories
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [open, setOpen] = useState(false);  // State for controlling the dropdown open/close
+  const [open, setOpen] = useState(false);
   const navigation = useNavigation();
 
-  const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/transactions/transactions`;
-  const categories_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories`; // Endpoint for fetching categories
+  const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/transactions/transactions/create`;
+  const categories_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories`;
 
   // Fetch user data
   useEffect(() => {
@@ -44,9 +45,7 @@ const CreateTransactions = () => {
           if (response.ok) {
             const data = await response.json();
             console.log("User ID: ", data.id);
-            setUserData({
-              id: data.id, // Store user ID
-            });
+            setUserData({ id: data.id });
           } else {
             console.error('Failed to fetch user info:', response.statusText);
             Alert.alert('Error', 'Unable to fetch user data.');
@@ -61,15 +60,19 @@ const CreateTransactions = () => {
     fetchUserData();
   }, []);
 
-  // Fetch categories from the backend
+  // Fetch all categories (both Income and Expense) and filter based on selected tab
   useEffect(() => {
     const fetchCategories = async () => {
+      console.log(`Fetching categories for type: ${selectedTab}`);
       try {
         const response = await axios.get(categories_url);
         if (response.status === 200) {
-          setCategories(response.data.map(cat => ({
-            label: cat.name,  // Display category name
-            value: cat.name,  // Set category name as value
+          setAllCategories(response.data); // Save all categories (both Income and Expense)
+          // Now filter categories based on the selected tab
+          const filteredCategories = response.data.filter(cat => cat.type === selectedTab);
+          setCategories(filteredCategories.map(cat => ({
+            label: cat.name,
+            value: cat.name,
           })));
         } else {
           console.error('Failed to fetch categories:', response.statusText);
@@ -82,7 +85,7 @@ const CreateTransactions = () => {
     };
 
     fetchCategories();
-  }, []);
+  }, [selectedTab]); // Fetch categories whenever the selected tab changes
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -99,47 +102,32 @@ const CreateTransactions = () => {
 
   const handleSubmit = async () => {
     if (!amount || !category || !date || !userData) {
-      Alert.alert('Error', userData ? 'Please fill out all required fields.' : 'User data is still loading, please wait.');
+      Alert.alert('Error', 'Please fill out all required fields.');
+      console.log("Missing fields in transaction data", { amount, category, date, userData });
       return;
     }
 
-    // Convert amount to a REAL (floating-point) number
     const parsedAmount = parseFloat(amount);
-
     if (isNaN(parsedAmount)) {
       Alert.alert('Error', 'Please enter a valid amount.');
       return;
     }
 
-    // Extract month and year from the selected date
-    const month = moment(date).format('MM');
-    const year = moment(date).format('YYYY');
-
-    // Log the data being sent to the backend
-    console.log('Sending transaction data:', {
-      amount: parsedAmount,  // Send the parsed number (REAL)
+    const transactionData = {
+      user_id: userData.id,
+      amount: parsedAmount,
       category,
-      type: selectedTab,
+      type: selectedTab === 'Income' ? 'income' : 'expense',
       date,
       note,
-      user_id: userData.id,
-      month,  // Send month
-      year,   // Send year
-    });
+    };
+
+    console.log("Transaction Data to be sent:", transactionData);
 
     try {
       const response = await axios.post(
         backend_url,
-        {
-          amount: parsedAmount, // Send the parsed number (REAL)
-          category, // Send the category name to the backend
-          type: selectedTab,
-          date,
-          note,
-          user_id: userData.id,
-          month,  // Send month
-          year,   // Send year
-        },
+        transactionData,
         {
           headers: {
             Authorization: `Bearer ${userData.id}`,
@@ -148,11 +136,15 @@ const CreateTransactions = () => {
         }
       );
 
-      Alert.alert('Success', response.data.message);
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Dashboard' }],
-      });
+      if (response.status === 201) {
+        Alert.alert('Success', response.data.message);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Dashboard' }],
+        });
+      } else {
+        Alert.alert('Error', response.data.error || 'An error occurred.');
+      }
     } catch (error) {
       console.error('Error creating transaction', error.response ? error.response.data : error.message);
       Alert.alert('Error', 'There was an issue creating the transaction');
@@ -191,6 +183,11 @@ const CreateTransactions = () => {
           dropDownStyle={styles.dropdown}
           containerStyle={styles.dropdownContainer}
           itemStyle={styles.dropdownItem}
+          listMode="SCROLLVIEW"  // Enables scroll mode for the dropdown
+          scrollViewProps={{
+            showsVerticalScrollIndicator: true,  // Adds vertical scroll indicator
+          }}
+          maxHeight={300}  // Allow the dropdown to show up to 300px before scrolling
         />
       </View>
       <View style={styles.row}>
@@ -318,7 +315,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 2,
-    fontSize: 26,
+    fontSize: 30,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 20,
@@ -355,15 +352,14 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     flex: 2,
-    height: 40,  // Adjust the height of the dropdown to match TextInput
+    height: 40,
   },
   dropdownItem: {
-    justifyContent: 'center', // Align text vertically
+    justifyContent: 'center',
   },
   placeholder: {
-      fontSize: 30,
-  }
+    fontSize: 30,
+  },
 });
-
 
 export default CreateTransactions;
