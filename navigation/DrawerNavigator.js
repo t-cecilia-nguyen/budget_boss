@@ -16,6 +16,8 @@ import SettingsStackNavigator from './SettingsNavigator';
 
 // Import screens
 import MyAccount from '../screens/MyAccount';
+import Settings from '../screens/Settings';
+import CreateTransactions from '../screens/CreateTransactions';
 
 const Drawer = createDrawerNavigator();
 
@@ -67,13 +69,12 @@ function CustomDrawerContent(props) {
               name: `${data.firstName} ${data.lastName}`,
               email: data.email,
             });
-    
           } else {
-            console.error("Failed to fetch user info:", response.statusText);
+            console.error('Failed to fetch user info:', response.statusText);
           }
         }
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        console.error('Error fetching user info:', error);
       }
     };
 
@@ -143,6 +144,18 @@ export default function DrawerNavigator() {
           ),
           headerTitle: () => null,
         }}
+      />
+      <Drawer.Screen
+        name="Create Transactions"
+        component={CreateTransactions}
+        options={{
+          drawerIcon: ({}) => (
+            <MaterialIcons name="add" size={24} color={Colors.grey}/>
+          ),
+          headerTitle: () => null,
+          drawerItemStyle: { display: 'none' },
+        }}
+        initialParams={{ userId }}
       />
       <Drawer.Screen
         name="Settings"

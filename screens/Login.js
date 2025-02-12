@@ -40,7 +40,7 @@ export default function LoginScreen({ navigation }) {
         if (!isValid) return;
 
         const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/auth/login`;
-        console.log('Backend URL:', backend_url);
+        // console.log('Backend URL:', backend_url);
 
         try {
             const response = await axios.post(backend_url, {
@@ -54,7 +54,7 @@ export default function LoginScreen({ navigation }) {
 
                 // Save token to AsyncStorage
                 await AsyncStorage.setItem('token', token);
-                console.log('Token saved:', token);
+                // console.log('Token saved:', token);
                 navigation.navigate('DrawerNavigator'); // Navigate to Dashboard
             } else {
                 Alert.alert("Error", "An error occurred while logging in. Please try again.");

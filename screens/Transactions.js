@@ -17,7 +17,7 @@ const TransactionsScreen = () => {
                 // PLACEHOLDER!!!!! remember to fix
                 const response = await axios.post(backend_url, {
                     user_id: 1,  
-                    month: '01',  
+                    month: '02',  
                     year: '2025',  
                 });
 

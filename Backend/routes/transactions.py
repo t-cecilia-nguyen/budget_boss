@@ -1,3 +1,4 @@
+
 from flask import Blueprint, request, jsonify
 from database import get_db
 
@@ -20,7 +21,7 @@ def get_transactions():
 
 
         date_from = f"{year}-{month}-01"
-        date_to = f"{year}-{month}-31" 
+        date_to = f"{year}-{month}-31"
 
 
         db = get_db()
@@ -55,5 +56,5 @@ def get_transactions():
         return jsonify(transactions_list), 200
 
     except Exception as e:
-        print(f"Error: {e}")  
+        print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
