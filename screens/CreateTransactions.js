@@ -60,32 +60,40 @@ const CreateTransactions = () => {
     fetchUserData();
   }, []);
 
-  // Fetch all categories (both Income and Expense) and filter based on selected tab
-  useEffect(() => {
-    const fetchCategories = async () => {
-      console.log(`Fetching categories for type: ${selectedTab}`);
-      try {
-        const response = await axios.get(categories_url);
-        if (response.status === 200) {
-          setAllCategories(response.data); // Save all categories (both Income and Expense)
-          // Now filter categories based on the selected tab
-          const filteredCategories = response.data.filter(cat => cat.type === selectedTab);
-          setCategories(filteredCategories.map(cat => ({
-            label: cat.name,
-            value: cat.name,
-          })));
-        } else {
-          console.error('Failed to fetch categories:', response.statusText);
-          Alert.alert('Error', 'Unable to fetch categories.');
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        Alert.alert('Error', 'An error occurred while fetching categories.');
-      }
-    };
+    // loading category into dropdown list
+    useEffect(() => {
+      const fetchCategories = async () => {
+        try {
+          const response = await axios.get(categories_url);
+          if (response.status === 200) {
+            const allCategories = response.data;
+            setAllCategories(allCategories); // Store all categories (Income & Expense)
 
-    fetchCategories();
-  }, [selectedTab]); // Fetch categories whenever the selected tab changes
+            // Filter categories based on selected tab
+            const filteredCategories = allCategories.filter(cat => cat.type === selectedTab);
+
+            // Remove duplicates based on name
+            const uniqueCategories = Array.from(new Set(filteredCategories.map(cat => cat.name)))
+              .map(name => filteredCategories.find(cat => cat.name === name));
+
+            // Set categories with unique keys
+            setCategories(uniqueCategories.map((cat) => ({
+              label: cat.name,
+              value: cat.name,
+            })));
+          } else {
+            console.error('Failed to fetch categories:', response.statusText);
+            Alert.alert('Error', 'Unable to fetch categories.');
+          }
+        } catch (error) {
+          console.error('Error fetching categories:', error);
+          Alert.alert('Error', 'An error occurred while fetching categories.');
+        }
+      };
+
+      fetchCategories();
+    }, [selectedTab]); // Runs when selectedTab changes
+
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -182,7 +190,8 @@ const CreateTransactions = () => {
           placeholder="Select a category"
           dropDownStyle={styles.dropdown}
           containerStyle={styles.dropdownContainer}
-          itemStyle={styles.dropdownItem}
+          itemStyle={[styles.dropdownItem, { fontSize: 30 }]}
+          labelStyle={{ fontSize: 26 }}
           listMode="SCROLLVIEW"  // Enables scroll mode for the dropdown
           scrollViewProps={{
             showsVerticalScrollIndicator: true,  // Adds vertical scroll indicator
@@ -356,6 +365,7 @@ const styles = StyleSheet.create({
   },
   dropdownItem: {
     justifyContent: 'center',
+    fontSize: 30,
   },
   placeholder: {
     fontSize: 30,
