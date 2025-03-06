@@ -42,7 +42,7 @@ const CreateTransactions = () => {
             },
           });
 
-          if (response.ok) {
+          if (response.status === 200) {
             const data = await response.json();
             console.log("User ID: ", data.id);
             setUserData({ id: data.id });

@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
+
+/*This component provide custom button Tab */
 const CustomButtonTab = ({ title, selectedButton, setSelectedButton }) => {
+  
   return (
  
     <TouchableWithoutFeedback

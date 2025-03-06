@@ -35,7 +35,7 @@ const ICONS = [
     "others.png"
   ];
   
-
+/* This component allows user to pick an icon image for a category */
 const IconPicker = ({ categoryImage, basePath, onImageSelect }) => {
   const [selectedIcon, setSelectedIcon] = useState(categoryImage || "default.png");
   const [modalVisible, setModalVisible] = useState(false);

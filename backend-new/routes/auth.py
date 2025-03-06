@@ -6,6 +6,34 @@ import datetime
 
 auth_bp = Blueprint('auth', __name__)
 
+# ADD DEFAULT CATEGORIES WHEN NEW USER SIGNED UP #
+DEFAULT_CATEGORIES = [
+    ('Salary', 'Income', 'Debit', 'salary.png'),
+    ('Investment', 'Income', 'Credit', 'investment.png'),
+    ('Savings', 'Income', 'Credit', 'savings.png'),
+    ('Freelance', 'Income', 'Credit', 'freelance.png'),
+    ('Bonus', 'Income', 'Credit', 'bonus.png'),
+    ('Food', 'Expense', 'Cash', 'food.png'),
+    ('Transport', 'Expense', 'Cash', 'transport.png'),
+    ('Utilities', 'Expense', 'Cash', 'utilities.png'),
+    ('Rent', 'Expense', 'Cash', 'rent.png'),
+    ('Groceries', 'Expense', 'Cash', 'groceries.png'),
+    ('Entertainment', 'Expense', 'Cash', 'entertainment.png'),
+    ('Healthcare', 'Expense', 'Cash', 'healthcare.png'),
+    ('Education', 'Expense', 'Cash', 'education.png'),
+    ('Clothing', 'Expense', 'Cash', 'clothing.png'),
+    ('Subscriptions', 'Expense', 'Cash', 'subscriptions.png'),
+    ('Gifts', 'Expense', 'Cash', 'gifts.png'),
+    ('Travel', 'Expense', 'Cash', 'travel.png'),
+    ('Vacation', 'Expense', 'Cash', 'vacation.png'),
+    ('Insurance', 'Expense', 'Cash', 'insurance.png'),
+    ('Mobile Bill', 'Expense', 'Cash', 'mobile.png'),
+    ('Internet', 'Expense', 'Cash', 'internet.png'),
+    ('Sports', 'Expense', 'Cash', 'sports.png'),
+]
+
+
+
 @auth_bp.route('/signup', methods=['POST'])
 def signup():
     try:
@@ -21,13 +49,21 @@ def signup():
         password_hash = generate_password_hash(password)
 
         db = get_db()
-        db.execute('''
+        cursor = db.execute('''
             INSERT INTO users (first_name, last_name, email, password_hash)
             VALUES (?, ?, ?, ?)
         ''', (first_name, last_name, email, password_hash))
+
+        # Insert default categories for the new user
+        user_id = cursor.lastrowid 
+        db.executemany('''
+            INSERT INTO categories (name, type, description, img_name, user_id)
+            VALUES (?, ?, ?, ?, ?)
+        ''', [(name, type_, desc, img, user_id) for name, type_, desc, img in DEFAULT_CATEGORIES])
+
         db.commit()
 
-        return jsonify({"message": "User created successfully"}), 201
+        return jsonify({"message": "User created successfully", "user_id": user_id}), 201
 
     except Exception as e:
         print(f"Error: {e}")
