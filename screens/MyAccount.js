@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import axios from 'axios';
+import { Colors } from '../assets/colors';
+import { MaterialIcons } from '@expo/vector-icons';
 
-const MyAccountScreen = () => {
+const MyAccountScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(true);
     const [userData, setUserData] = useState(null);
     const [firstName, setFirstName] = useState('');
@@ -74,6 +76,11 @@ const MyAccountScreen = () => {
 
             if (response.status === 200) {
                 Alert.alert('Success', 'Profile updated successfully!');
+                navigation.reset({ // Update the user data in drawer
+                    index: 0,
+                    routes: [{ name: 'DrawerNavigator' }],
+                });
+                
             } else {
                 Alert.alert('Error', response.data.message || 'Failed to update profile.');
             }
@@ -84,46 +91,51 @@ const MyAccountScreen = () => {
         }
     };
 
-    if (loading) {
-        return <ActivityIndicator size="large" color="#32659A" />;
-    }
-
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Edit Profile</Text>
 
-            {/* First Name Input */}
+            {/* First Name */}
             <Text style={styles.label}>First Name</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Enter first name"
-                value={firstName}
-                onChangeText={setFirstName}
-            />
+            <View style={styles.inputContainer}>
+                <MaterialIcons name="person" size={24} style={styles.icon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter first name"
+                    value={firstName}
+                    onChangeText={setFirstName}
+                />
+            </View>
 
-            {/* Last Name Input */}
+            {/* Last Name */}
             <Text style={styles.label}>Last Name</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Enter last name"
-                value={lastName}
-                onChangeText={setLastName}
-            />
+            <View style={styles.inputContainer}>
+                <MaterialIcons name="person" size={24} style={styles.icon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter last name"
+                    value={lastName}
+                    onChangeText={setLastName}
+                />
+            </View>
 
-            {/* Email Input */}
+            {/* Email */}
             <Text style={styles.label}>Email</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="Enter email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-            />
+            <View style={styles.inputContainer}>
+                <MaterialIcons name="email" size={24} style={styles.icon} />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter email"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
+            </View>
 
-            {/* Save Button */}
+            {/* Save */}
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Save</Text>}
+                <Text style={styles.buttonText}>SAVE</Text>
             </TouchableOpacity>
         </View>
     );
@@ -136,27 +148,37 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5F5F5',
     },
     title: {
-        fontSize: 22,
+        fontSize: 26,
         fontWeight: 'bold',
+        marginBottom: 10,
+        color: Colors.primaryBlue,
         textAlign: 'center',
-        marginBottom: 20,
     },
     label: {
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 5,
     },
-    input: {
-        height: 50,
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         borderWidth: 1,
         borderColor: '#CCC',
         borderRadius: 8,
-        paddingHorizontal: 10,
         backgroundColor: '#FFF',
         marginBottom: 15,
+        paddingLeft: 10,
+    },
+    input: {
+        flex: 1,
+        height: 50,
+        paddingLeft: 10,
+    },
+    icon: {
+        color: Colors.darkBlue,
     },
     button: {
-        backgroundColor: '#32659A',
+        backgroundColor: Colors.primaryBlue,
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',

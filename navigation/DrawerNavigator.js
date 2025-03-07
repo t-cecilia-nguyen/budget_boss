@@ -16,7 +16,6 @@ import SettingsStackNavigator from './SettingsNavigator';
 
 // Import screens
 import MyAccount from '../screens/MyAccount';
-import Settings from '../screens/Settings';
 import CreateTransactions from '../screens/CreateTransactions';
 
 const Drawer = createDrawerNavigator();
