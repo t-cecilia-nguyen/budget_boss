@@ -1,36 +1,120 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons'; 
+import DropDownPicker from 'react-native-dropdown-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TransactionsScreen = () => {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [selectedTransactionId, setSelectedTransactionId] = useState(null);
 
+    const basePath = "http://10.0.2.2:5000/uploads/";
     const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/transactions/transactions`;
 
+    const [openMonth, setOpenMonth] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+    const [openYear, setOpenYear] = useState(false);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
     useEffect(() => {
-        const fetchTransactions = async () => {
-            try {
-                // PLACEHOLDER!!!!! remember to fix
-                const response = await axios.post(backend_url, {
-                    user_id: 1,  
-                    month: '02',  
-                    year: '2025',  
-                });
-
-                setTransactions(response.data);  
-            } catch (err) {
-                setError('Failed to fetch transactions');
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchTransactions();
-    }, [backend_url]);
+    }, [selectedMonth, selectedYear]);
+
+    const fetchTransactions = async () => {
+        setLoading(true);
+        setError(null); 
+    
+        try {
+            const token = await AsyncStorage.getItem('token');
+    
+            const userProfileUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
+            const userResponse = await axios.get(userProfileUrl, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const userId = userResponse.data.id;
+            // console.log("User ID:", userId);
+    
+            const response = await axios.post(backend_url, {
+                user_id: userId,  
+                month: selectedMonth.toString().padStart(2, '0'),  
+                year: selectedYear.toString(),  
+            });
+    
+            if (response.data.length === 0) {
+                console.warn(`No transactions found for ${selectedMonth}/${selectedYear}`);
+                setTransactions([]); 
+            }
+    
+            setTransactions(response.data);
+        } catch (err) {
+            console.warn('Failed to fetch transactions for selected month/year. Reverting to current month.');
+    
+            // Fallback to current month and year
+            const currentMonth = new Date().getMonth() + 1;
+            const currentYear = new Date().getFullYear();
+    
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const userProfileUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
+                const userResponse = await axios.get(userProfileUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+    
+                const userId = userResponse.data.id;
+    
+                const fallbackResponse = await axios.post(backend_url, {
+                    user_id: userId,  
+                    month: currentMonth.toString().padStart(2, '0'),  
+                    year: currentYear.toString(),  
+                });
+    
+                if (fallbackResponse.data.length === 0) {
+                    console.warn(`No transactions found for ${currentMonth}/${currentYear}`);
+                    setTransactions([]);
+                    return;
+                }
+    
+                setTransactions(fallbackResponse.data);
+                setSelectedMonth(currentMonth);
+                setSelectedYear(currentYear);
+            } catch (fallbackErr) {
+                console.error("No transactions found.");
+                setTransactions([]); 
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleDelete = async (transactionId) => {
+        if (!transactionId) {
+            alert("Error: Transaction ID is missing.");
+            return;
+        }
+
+        try {
+            const deleteUrl = `http://10.0.2.2:5000/transactions/delete/${transactionId}`;
+            const response = await axios.delete(deleteUrl);
+
+            if (response.status === 200) {
+                setTransactions(prevTransactions => prevTransactions.filter(item => item.id !== transactionId));
+                setSelectedTransactionId(null);
+            } else {
+                alert('Failed to delete transaction.');
+            }
+        } catch (err) {
+            alert('Failed to delete transaction.');
+        }
+    };
 
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
@@ -40,9 +124,8 @@ const TransactionsScreen = () => {
         return <Text>{error}</Text>;
     }
 
-    // Group transactions by date
     const groupedTransactions = transactions.reduce((groups, transaction) => {
-        const date = transaction.date;  //  date should be in a 'YYYY-MM-DD' format
+        const date = transaction.date;
         if (!groups[date]) {
             groups[date] = [];
         }
@@ -50,24 +133,19 @@ const TransactionsScreen = () => {
         return groups;
     }, {});
 
-    // Calculate total inflow, outflow, and balance
     const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
     const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
     const balance = inflow - outflow;
 
     const renderItem = ({ item }) => (
-        <View style={styles.transactionItem}>
-
+        <TouchableOpacity 
+            style={styles.transactionItem} 
+            onPress={() => setSelectedTransactionId(item.id === selectedTransactionId ? null : item.id)}
+        >
             <View style={styles.transactionDetails}>
                 <View style={styles.categoryRow}>
                     {item.icon ? (
-                        <Image
-                            source={{ uri: item.icon }}
-                            style={{
-                                width: 20,
-                                height: 20,
-                            }}
-                        />
+                        <Image source={{ uri: `${basePath}${item.icon}` }} style={styles.icon} />
                     ) : (
                         <Ionicons
                             name={'pricetag-outline'}
@@ -75,7 +153,6 @@ const TransactionsScreen = () => {
                             color={item.type === 'income' ? 'green' : 'red'}
                         />
                     )}
-        
 
                     <View style={styles.transactionHeader}>
                         <Text style={styles.transactionCategory}>{item.category}</Text>
@@ -83,39 +160,69 @@ const TransactionsScreen = () => {
                         <Text style={[styles.transactionAmount, item.type === 'income' ? styles.income : styles.expense]}>
                             {item.type === 'income' ? `+${item.amount}` : `-${item.amount}`}
                         </Text>
-                    </View>
 
+                        {selectedTransactionId === item.id && (
+                            <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                                <Ionicons name="close-circle" size={24} color="red" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
-                <Text style={[styles.transactionDescription]}>
-                    {item.note || '-'}
-                </Text>
+                <Text style={styles.transactionDescription}>{item.note || '-'}</Text>
             </View>
+        </TouchableOpacity>
+    );
+
+    const renderGroupItem = ({ item }) => (
+        <View style={styles.transactionCard}>
+            <Text style={styles.groupDate}>{item[0].date}</Text>
+            <View style={styles.separatorLine}></View>
+            {item.map(transaction => renderItem({ item: transaction }))}
         </View>
     );
 
-    const renderGroupItem = ({ item }) => {
-        return (
-            <View style={styles.transactionCard}>
-                <Text style={styles.groupDate}>{item[0].date}</Text>
-                <View style={styles.separatorLine}></View>
-                {item.map(transaction => renderItem({ item: transaction }))}
-            </View>
-        );
-    };
-
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>My Transactions</Text>
+            <View style={styles.headerRow}>
+                <Text style={styles.header}>My Transactions</Text>
+
+                {/* Dropdowns for month and year selection */}
+                <View style={styles.dropdownWrapper}>
+                    <DropDownPicker
+                        open={openMonth}
+                        value={selectedMonth}
+                        items={[...Array(12).keys()].map((i) => ({
+                            label: new Date(0, i).toLocaleString('en-US', { month: 'long' }),
+                            value: i + 1,
+                        }))}
+                        setOpen={setOpenMonth}
+                        setValue={setSelectedMonth}
+                        placeholder="Month"
+                        containerStyle={styles.dropdownContainer}
+                        style={styles.dropdown}
+                    />
+                    <DropDownPicker
+                        open={openYear}
+                        value={selectedYear}
+                        items={[...Array(5).keys()].map((i) => ({
+                            label: (new Date().getFullYear() - i).toString(),
+                            value: new Date().getFullYear() - i,
+                        }))}
+                        setOpen={setOpenYear}
+                        setValue={setSelectedYear}
+                        placeholder="Year"
+                        containerStyle={styles.dropdownContainer}
+                        style={styles.dropdown}
+                    />
+                </View>
+            </View>
+
             <View style={styles.balanceContainer}>
                 <Text style={styles.balanceText}>This Month</Text>
                 <View style={styles.separatorLine}></View>
                 <View style={styles.progressBar}>
-                    <View
-                        style={[styles.progressFill, { flex: inflow / (inflow + outflow || 1) }]}>
-                    </View>
-                    <View
-                        style={[styles.progressEmpty, { flex: outflow / (inflow + outflow || 1) }]}>
-                    </View>
+                    <View style={[styles.progressFill, { flex: inflow / (inflow + outflow || 1) }]} />
+                    <View style={[styles.progressEmpty, { flex: outflow / (inflow + outflow || 1) }]} />
                 </View>
                 
                 <View style={styles.balanceDetails}>
@@ -136,14 +243,13 @@ const TransactionsScreen = () => {
             </View>
 
             <FlatList
-                data={Object.values(groupedTransactions)}  
+                data={Object.values(groupedTransactions)}
                 renderItem={renderGroupItem}
                 keyExtractor={(item, index) => item[0].date + index.toString()}  
             />
         </View>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -222,53 +328,20 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         elevation: 2,
     },
-    groupDate: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 8,
-        color: '#555',
-    },
     transactionHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',  
+        justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%',  
+        width: '100%',
     },
-    
-    transactionCategory: {
-        fontSize: 16,
-        fontWeight: 'bold',
-
+    transactionItem: {
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
     },
-    
-    transactionAmount: {
-        fontSize: 16,
-        fontWeight: '600',
-        textAlign: 'right',  
-        width: '40%',  
-    },
-    transactionDate: {
-        fontSize: 14,
-        color: '#555',
-    },
-    transactionAmount: {
-        fontSize: 16,
-        fontWeight: '600',
-        marginRight: 15,
-    },
-    income: {
-        color: '#28a745',
-    },
-    expense: {
-        color: '#dc3545',
-    },
-    transactionDetails: {
-        marginTop: 8,
-    },
-    categoryRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4,
+    icon: {
+        width: 20,
+        height: 20,
     },
     transactionCategory: {
         fontSize: 16,
@@ -280,10 +353,25 @@ const styles = StyleSheet.create({
         color: '#777',
         marginTop: 4,
     },
-    separatorLine: {
-        height: 1,
-        backgroundColor: '#ddd',  
-        marginVertical: 8, 
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    dropdownWrapper: {
+        flexDirection: 'row',
+    },
+    dropdownContainer: {
+        width: 120,
+        marginLeft: 10,
+    },
+    dropdown: {
+        backgroundColor: '#fff',
+    },
+    header: {
+        fontSize: 24,
+        fontWeight: 'bold',
     },
 });
 

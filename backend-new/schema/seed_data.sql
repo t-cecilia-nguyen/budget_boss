@@ -1,5 +1,4 @@
 -- Seed data for Income categories
-console.log('Seeding categories...');
 
 INSERT INTO categories (user_id, name, type, description, img_name)
 VALUES 

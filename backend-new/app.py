@@ -9,6 +9,7 @@ from routes.profile import profile_bp
 from routes.budgets import budgets_bp
 from routes.transactions import transactions_bp
 from routes.createtransactions import create_transaction_bp
+from routes.deletetransactions import delete_transaction_bp
 
 app = Flask(__name__)
 CORS(app) 
@@ -24,8 +25,11 @@ app.register_blueprint(categories.bp)
 app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(profile_bp, url_prefix='/profile')
 app.register_blueprint(budgets_bp, url_prefix='/budgets')
-app.register_blueprint(transactions_bp, url_prefix='/transactions')
-app.register_blueprint(create_transaction_bp, url_prefix='/transactions')
+
+# Transactions routes
+app.register_blueprint(transactions_bp, url_prefix='/transactions')  # Fetch transactions
+app.register_blueprint(create_transaction_bp, url_prefix='/transactions')  # Create transactions
+app.register_blueprint(delete_transaction_bp, url_prefix='/transactions/delete')  # DELETE transactions
 
 # Close database after each request
 @app.teardown_appcontext
@@ -34,4 +38,4 @@ def teardown_db(exception):
 
 if __name__ == '__main__':
     init_db()  # Initialize
-    app.run(host='127.0.0.1' , port=5000, debug=True)
+    app.run(host='127.0.0.1' , port=5000)
