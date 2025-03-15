@@ -100,19 +100,24 @@ const TransactionsScreen = () => {
             alert("Error: Transaction ID is missing.");
             return;
         }
-
+    
         try {
-            const deleteUrl = `http://10.0.2.2:5000/transactions/delete/${transactionId}`;
+            const token = await AsyncStorage.getItem('token'); 
+            const deleteUrl = `http://10.0.2.2:5000/transactions/transactions/${transactionId}`;
+    
             const response = await axios.delete(deleteUrl);
-
+    
             if (response.status === 200) {
+                // Remove the deleted transaction from state
                 setTransactions(prevTransactions => prevTransactions.filter(item => item.id !== transactionId));
                 setSelectedTransactionId(null);
+                alert('Transaction deleted successfully.');
             } else {
-                alert('Failed to delete transaction.');
+                alert(response.data.error || 'Failed to delete transaction.');
             }
         } catch (err) {
-            alert('Failed to delete transaction.');
+            console.error('Error deleting transaction:', err);
+            alert(err.response?.data?.error || 'Failed to delete transaction.');
         }
     };
 

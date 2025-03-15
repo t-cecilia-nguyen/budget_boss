@@ -29,7 +29,7 @@ app.register_blueprint(budgets_bp, url_prefix='/budgets')
 # Transactions routes
 app.register_blueprint(transactions_bp, url_prefix='/transactions')  # Fetch transactions
 app.register_blueprint(create_transaction_bp, url_prefix='/transactions')  # Create transactions
-app.register_blueprint(delete_transaction_bp, url_prefix='/transactions/delete')  # DELETE transactions
+app.register_blueprint(delete_transaction_bp, url_prefix='/transactions')  # DELETE transactions
 
 # Close database after each request
 @app.teardown_appcontext
