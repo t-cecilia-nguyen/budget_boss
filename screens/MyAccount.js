@@ -13,12 +13,16 @@ const MyAccountScreen = ({ navigation }) => {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
 
+    // Fetch user data
     useEffect(() => {
         const fetchUserData = async () => { 
+            // Get token from AsyncStorage
             const token = await AsyncStorage.getItem('token');
+            // Backend URL
             const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
 
             try {
+                // Send GET request for user data
                 const response = await axios.get(backendUrl, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -28,29 +32,36 @@ const MyAccountScreen = ({ navigation }) => {
                 const data = response.data;
 
                 if (response.status === 200) {
+                    // Set user data
                     setUserData(data);
                     setFirstName(data.firstName);
                     setLastName(data.lastName);
                     setEmail(data.email);
                 } else {
+                    // Display error message
                     Alert.alert('Error', data.message || 'Failed to fetch user data.');
                 }
             } catch (error) {
+                // Display error message
                 Alert.alert('Error', 'Something went wrong. Please try again.');
             } finally {
+                // Stop loading spinner
                 setLoading(false);
             }
         };
 
         fetchUserData();
-    }, []);
+    }, []); // Empty array to run only once
 
+    // Save user data
     const handleSave = async () => {
+        // Validate inputs
         if (!firstName || !lastName || !email) {
             Alert.alert('Error', 'All fields are required!');
             return;
         }
 
+        // Email validation
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$/;
 
         if (!emailRegex.test(email)) {
@@ -61,9 +72,12 @@ const MyAccountScreen = ({ navigation }) => {
         setLoading(true);
 
         try {
+            // Get token from AsyncStorage
             const token = await AsyncStorage.getItem('token');
+            // Backend URL
             const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
 
+            // Send PUT request to update user data
             const response = await axios.put(backendUrl, {
                 firstName,
                 lastName,
@@ -82,9 +96,11 @@ const MyAccountScreen = ({ navigation }) => {
                 });
                 
             } else {
+                // Display error message
                 Alert.alert('Error', response.data.message || 'Failed to update profile.');
             }
         } catch (error) {
+            // Display error message
             Alert.alert('Error', 'Something went wrong. Please try again.');
         } finally {
             setLoading(false);
@@ -93,6 +109,7 @@ const MyAccountScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
+            {/* Edit Profile Title */}
             <Text style={styles.title}>Edit Profile</Text>
 
             {/* First Name */}

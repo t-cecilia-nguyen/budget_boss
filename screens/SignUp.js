@@ -21,13 +21,16 @@ export default function SignUpScreen({ navigation }) {
         confirmPassword: '',
     });
 
+    // Regular expressions for email and password validation
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$/;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 
+    // Validate inputs
     const validateInputs = () => {
         let isValid = true;
         let tempErrors = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
 
+        // Check if fields are empty
         if (!firstName) {
             tempErrors.firstName = 'First name is required';
             isValid = false;
@@ -39,33 +42,37 @@ export default function SignUpScreen({ navigation }) {
         if (!email) {
             tempErrors.email = 'Email is required';
             isValid = false;
-        } else if (!emailRegex.test(email)) {
+        } else if (!emailRegex.test(email)) { // Check if email is valid
             tempErrors.email = 'Please enter a valid email';
             isValid = false;
         }
         if (!password) {
             tempErrors.password = 'Password is required';
             isValid = false;
-        } else if (!passwordRegex.test(password)) {
+        } else if (!passwordRegex.test(password)) { // Check if password meets requirements
             tempErrors.password = 'Password must be minimum 8 characters, at least 1 uppercase letter, 1 lowercase letter and 1 number';
             isValid = false;
         }
-        if (password !== confirmPassword) {
+        if (password !== confirmPassword) { // Check if passwords match
             tempErrors.confirmPassword = 'Passwords do not match';
             isValid = false;
         }
         
+        // Update errors state
         setErrors(tempErrors);
         return isValid;
     };
 
+    // Handle signup
     const handleSignUp = async () => {
         // Validate inputs
         const isValid = validateInputs();
         if (!isValid) return;
 
+        // Backend URL
         const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/auth/signup`;
         try {
+            // Send POST request to signup
             const response = await axios.post(backend_url, {
                 firstName,
                 lastName,
@@ -74,12 +81,14 @@ export default function SignUpScreen({ navigation }) {
             });
 
             if (response.data.error) {
+                // Display error message
                 Alert.alert("Error", response.data.error);
             } else {
                 Alert.alert("Success", "User created successfully!");
                 navigation.navigate('Login'); // Navigate to Login
             }
         } catch (error) {
+            // Display error message
             console.error('Error during signup:', error);
         }
     };    
@@ -106,7 +115,11 @@ export default function SignUpScreen({ navigation }) {
         >
             <View style={styles.overlay}>
                 <View style={styles.card}>
+
+                    {/* SignUp Title */}
                     <Text style={styles.title}>SignUp</Text>
+
+                    {/* First Name */}
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="person" size={24} style={styles.icon}/>
                         <TextInput
@@ -118,6 +131,8 @@ export default function SignUpScreen({ navigation }) {
                         />
                         <Text style={getErrorTextStyle('firstName')}>{errors.firstName}</Text>
                     </View>
+
+                    {/* Last Name */}
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="person" size={24} style={styles.icon}/>
                         <TextInput
@@ -129,6 +144,8 @@ export default function SignUpScreen({ navigation }) {
                         />
                         <Text style={getErrorTextStyle('lastName')}>{errors.lastName}</Text>
                     </View>
+
+                    {/* Email */}
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="email" size={24} style={styles.icon}/>
                         <TextInput
@@ -142,6 +159,8 @@ export default function SignUpScreen({ navigation }) {
                         />
                         <Text style={getErrorTextStyle('email')}>{errors.email}</Text>
                     </View>
+
+                    {/* Password */}
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="lock" size={24} style={styles.icon}/>
                         <TextInput
@@ -154,6 +173,8 @@ export default function SignUpScreen({ navigation }) {
                         />
                         <Text style={getErrorTextStyle('password')}>{errors.password}</Text>
                     </View>
+
+                    {/* Confirm Password */}
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="lock" size={24} style={styles.icon}/>
                         <TextInput
@@ -166,10 +187,14 @@ export default function SignUpScreen({ navigation }) {
                         />
                         <Text style={getErrorTextStyle('confirmPassword')}>{errors.confirmPassword}</Text>
                     </View>
+
+                    {/* SignUp Button */}
                     <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
                         <Text style={styles.signupButtonText}>SIGNUP</Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Login Link */}
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                     <Text style={styles.loginText}>Already have an account? Login here</Text>
                 </TouchableOpacity>

@@ -6,8 +6,10 @@ import { Colors } from '../assets/colors';
 export default function FAQ() {
     const [expanded, setExpanded] = useState(null);
 
+    // FAQ data
     const faqs = [
         {
+        // 1
         question: 'How do I update my account information?',
         answer: (
             <Text>Navigate to My Account from the top left menu <MaterialIcons name="menu" size={8} color={Colors.primaryBlue} />, 
@@ -16,6 +18,7 @@ export default function FAQ() {
             ),
         },
         {
+        // 2
         question: 'How do I change my password?',
         answer: (
             <Text>Navigate to My Account from the top left menu <MaterialIcons name="menu" size={8} color={Colors.primaryBlue} />, 
@@ -24,6 +27,7 @@ export default function FAQ() {
         ),
         },
         {
+        // 3
         question: 'How do I add an expense or income?',
         answer: (
             <Text>Navigate to the Dashboard from the top left menu <MaterialIcons name="menu" size={8} color={Colors.primaryBlue} />,
@@ -38,6 +42,7 @@ export default function FAQ() {
         ),
         },
         {
+        // 4
         question: 'How do I add a budget?',
         answer: (
             <Text>Navigate to the Dashboard from the top left menu <MaterialIcons name="menu" size={8} color={Colors.primaryBlue} /> and tap on the Budgets tab <MaterialIcons name="currency-exchange" size={12} color={Colors.primaryBlue} /> at the bottom of the screen.{"\n\n"}
@@ -50,6 +55,7 @@ export default function FAQ() {
         ),
         },
         {
+        // 5
         question: 'Where do I view my budgets?',
         answer: (
             <Text>Navigate to the Dashboard from the top left menu <MaterialIcons name="menu" size={8} color={Colors.primaryBlue} />,
@@ -60,6 +66,7 @@ export default function FAQ() {
         ),
         },
         {
+        // 6
         question: 'How do I manage my categories?',
         answer: (
             <Text>Navigate to the Dashboard from the top left menu <MaterialIcons name="menu" size={8} color={Colors.primaryBlue} />,
@@ -74,6 +81,7 @@ export default function FAQ() {
         ),
     },
         {
+        // 7
         question: 'I forgot my password.',
         answer: (
             <Text>On the Login screen, tap 'Forgot Password'. Enter your registered email, and you'll receive a link to reset your password.</Text>
@@ -83,18 +91,26 @@ export default function FAQ() {
 
     return (
         <ScrollView style={styles.container}>
+            
+        {/* FAQ Title */}
         <Text style={styles.title}>Frequently Asked Questions (FAQ)</Text>
 
         {/* General Questions */}
         <View style={styles.sectionContainer}>
             <Text style={styles.titleText}>GENERAL QUESTIONS</Text>
+
+            {/* Map through the FAQ data: 0 to 1 */}
             {faqs.slice(0, 2).map((faq, index) => (
             <View key={index} style={styles.textContainer}>
+
+                {/* Expandable Question */}
                 <TouchableOpacity onPress={() => setExpanded(expanded === index ? null : index)}>
                 <View style={styles.row}>
                     <Text style={styles.question}>
                     {faq.question}
                     </Text>
+
+                    {/* Expand/Collapse Icon */}
                     <MaterialIcons
                     name={expanded === index ? 'expand-less' : 'expand-more'}
                     size={24}
@@ -102,6 +118,8 @@ export default function FAQ() {
                     />
                 </View>
                 </TouchableOpacity>
+
+                {/* Answer */}
                 {expanded === index && <Text style={styles.answer}>{faq.answer}</Text>}
             </View>
             ))}
@@ -109,13 +127,19 @@ export default function FAQ() {
 
         {/* Features and Functionality */}
         <Text style={styles.titleText}>FEATURES AND FUNCTIONALITY</Text>
+
+        {/* Map through the FAQ data: 2 to 5*/}
         {faqs.slice(2, 6).map((faq, index) => (
             <View key={index} style={styles.textContainer}>
+
+            {/* Expandable Question */}
             <TouchableOpacity onPress={() => setExpanded(expanded === index + 2 ? null : index + 2)}>
                 <View style={styles.row}>
                 <Text style={styles.question}>
                     {faq.question}
                 </Text>
+
+                {/* Expand/Collapse Icon */}
                 <MaterialIcons
                     name={expanded === index + 2 ? 'expand-less' : 'expand-more'}
                     size={24}
@@ -123,29 +147,12 @@ export default function FAQ() {
                 />
                 </View>
             </TouchableOpacity>
+
+            {/* Answer */}
             {expanded === index + 2 && <Text style={styles.answer}>{faq.answer}</Text>}
             </View>
         ))}
-
-        {/* Troubleshooting */}
-        <Text style={styles.titleText}>TROUBLESHOOTING</Text>
-        {faqs.slice(6).map((faq, index) => (
-            <View key={index} style={styles.textContainer}>
-            <TouchableOpacity onPress={() => setExpanded(expanded === index + 6 ? null : index + 6)}>
-                <View style={styles.row}>
-                <Text style={styles.question}>
-                    {faq.question}
-                </Text>
-                <MaterialIcons
-                    name={expanded === index + 6 ? 'expand-less' : 'expand-more'}
-                    size={24}
-                    color={Colors.primaryBlue}
-                />
-                </View>
-            </TouchableOpacity>
-            {expanded === index + 6 && <Text style={styles.answer}>{faq.answer}</Text>}
-            </View>
-        ))}
+        
         </ScrollView>
     );
     }

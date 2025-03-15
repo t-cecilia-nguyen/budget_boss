@@ -17,8 +17,10 @@ const LoginSecurityScreen = ({ navigation }) => {
         confirmPassword: '',
     });
 
+    // Regular expression for password validation
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 
+    // Validate email and password
     const validateInputs = () => {
         let isValid = true;
         let tempErrors = { newPassword: '', confirmPassword: '' };
@@ -43,6 +45,7 @@ const LoginSecurityScreen = ({ navigation }) => {
         return isValid;
     };
 
+    // Update password
     const handleSave = async () => {
         // Validate inputs
         const isValid = validateInputs();
@@ -53,9 +56,12 @@ const LoginSecurityScreen = ({ navigation }) => {
         setLoading(true);
 
         try {
+            // Get token from AsyncStorage
             const token = await AsyncStorage.getItem('token');
+            // Backend URL
             const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/password`;
 
+            // Send PUT request to update password
             const response = await axios.put(backendUrl, {
                 password: newPassword,
             }, {
@@ -65,12 +71,15 @@ const LoginSecurityScreen = ({ navigation }) => {
             });
 
             if (response.status === 200) {
+                // Password updated successfully
                 Alert.alert('Success', 'Password updated successfully!');
                 navigation.goBack();
             } else {
+                // Error if password update fails
                 Alert.alert('Error', response.data.message || 'Failed to update password.');
             }
         } catch (error) {
+            // Errors during password update
             Alert.alert('Error', 'Something went wrong. Please try again.');
         } finally {
             setLoading(false);
@@ -94,8 +103,11 @@ const LoginSecurityScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
+
+            {/* Update Account Title */}
             <Text style={styles.title}>Update Account</Text>
 
+            {/* New Password */}
             <Text style={styles.label}>New Password</Text>
             <View style={styles.inputContainer}>
                 <MaterialIcons name="lock" size={24} style={styles.icon} />
@@ -109,6 +121,7 @@ const LoginSecurityScreen = ({ navigation }) => {
             </View>
             <Text style={getErrorTextStyle('newPassword')}>{errors.newPassword}</Text>
 
+            {/* Confirm Password */}
             <Text style={styles.label}>Confirm Password</Text>
             <View style={styles.inputContainer}>
                 <MaterialIcons name="lock" size={24} style={styles.icon} />
@@ -122,6 +135,7 @@ const LoginSecurityScreen = ({ navigation }) => {
             </View>
             <Text style={getErrorTextStyle('confirmPassword')}>{errors.confirmPassword}</Text>
 
+            {/* Save Button */}
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>SAVE</Text>}
             </TouchableOpacity>
