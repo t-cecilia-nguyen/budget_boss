@@ -12,8 +12,8 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 
-import HorizontalLine from "../components/categories/HorizontalLine";
-import CustomButtonTab from "../components/categories/CustomButtonTab";
+import HorizontalLine from "../components/HorizontalLine";
+import CustomButtonTab from "../components/CustomButtonTab";
 import ExpenseComponent from "../components/categories/ExpenseComponent";
 import IncomeComponent from "../components/categories/IncomeComponent";
 import NeedHelp from "../components/categories/NeedHelp";
