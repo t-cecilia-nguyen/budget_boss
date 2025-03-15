@@ -10,42 +10,78 @@ import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import Constants from "expo-constants";
+
 
 const { width: screenWidth } = Dimensions.get("window");
-const basePath = "http://10.0.2.2:5000/uploads/";
+const basePath = `${Constants.expoConfig.extra.API_BACKEND_URL}/uploads/`;
 
-const ExpenseComponent = ({userId, selected}) => {
+/* This component filters out Expense categories list*/
+
+const ExpenseComponent = ({selected,userId, token, updatedCategories}) => {
   const [categories, setCategories] = useState([]);
 
+  //console.log("token recieved from parent categories component: ", token)
   const navigation = useNavigation();
 
+
   const handleEditPress = (item) => {
-    navigation.navigate("EditCategory", { data: item, userId , selected}); 
+    navigation.navigate("EditCategory", { data: item, userId , selected, token}); 
   };
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
-  const fetchCategories = () => {
-    fetch("http://10.0.2.2:5000/categories", {
-      method: "GET",
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
+  const fetchCategories = async () => {
+    const url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories`;
+
+    if (token) {
+      try {
+        const response = await axios.get(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = response.data;
+
+        //console.log("Data: ", data)
+        if (!Array.isArray(data)) {
+          console.error("Error: API response is not an array!", data);
+          return;
+        }
         // Use the base path to construct the image URLs
-        const categoriesItems = data
-          .map((item) => ({
+        const categoriesItems = data.map((item) => ({
             ...item,
             img_url: `${basePath}${item.img_name}`,
           }))
           .filter((item) => item.type === "Expense");
+
         setCategories(categoriesItems);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+      } catch {
+        (error) => {
+          console.error("Error fetching data:", error);
+        };
+      }
+    } else{
+      console.error("No token..");
+    }
   };
+  useEffect(() => {
+    try {
+      if (updatedCategories) {
+        // Filter updatedCategories to only include 'Expense' types
+        const expenseCategories = updatedCategories.filter(
+          (category) => category.type === "Expense"
+        );
+        setCategories(expenseCategories); 
+      } else {
+        fetchCategories();
+      }
+    } catch (error) {
+      console.log("Error fetching categories:", error);
+    }
+  }, [updatedCategories]);
+  
 
   const renderData = (item) => {
     return (

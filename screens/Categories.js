@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 
@@ -17,18 +18,16 @@ import ExpenseComponent from "../components/categories/ExpenseComponent";
 import IncomeComponent from "../components/categories/IncomeComponent";
 import NeedHelp from "../components/categories/NeedHelp";
 
-
 const { width: screenWidth } = Dimensions.get("window");
-const basePath = "http://10.0.2.2:5000/uploads/";
+const basePath = `${Constants.expoConfig.extra.API_BACKEND_URL}/uploads/`;
 
-const CategoriesScreen = ({route}) => {
-
+const CategoriesScreen = ({ route }) => {
   const [userId, setUserId] = useState(null);
+  const [token, setToken] = useState("");
   const [selectedButton, setSelectedButton] = useState("Expense");
   const navigation = useNavigation();
   const [categories, setCategories] = useState([]);
-  const {user_Id, selected, updatedCategories } = route.params || {};
-
+  const { user_Id, selected, updatedCategories } = route.params || {};
 
   useEffect(() => {
     if (selected === "Income") {
@@ -38,75 +37,111 @@ const CategoriesScreen = ({route}) => {
     }
   }, [selected]);
 
+  //Retrieve user token to get id
   useEffect(() => {
-    const fetchUser = async () => {
+    const getUserId = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
+        const storedToken = await AsyncStorage.getItem("token");
 
-        if (token) {
-          const response = await fetch(backendUrl, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          });
+        if (!storedToken) {
+          console.log("No token could be found.");
+          return;
+        }
+        setToken(storedToken);
+        //console.log("Retrieved token:", storedToken)
+      } catch (error) {
+        console.error("Error retrieving token:", error);
+      }
 
-          if (response.ok) {
-            const data = await response.json();
-            console.log("User data: ", data);
-            setUserId(data.id);
-    
-          } else {
-            console.error("Failed to fetch user info:", response.statusText);
-          }
+      if (!token) return;
+      const userUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
+
+      try {
+        const response = await axios.get(userUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          const data = await response.data;
+          setUserId(data.id);
+        } else {
+          console.error("Failed to fetch user info:", response.statusText);
         }
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        console.error("Error fetching user:", error);
       }
     };
 
-    fetchUser();
-  }, [user_Id]);
+    getUserId();
+  }, [token]);
+
 
   const handleCreatePress = () => {
-    navigation.navigate("CreateCategory", { userId: userId, selected: selectedButton });
+    navigation.navigate("CreateCategory", {
+      userId: userId,
+      selected: selectedButton,
+      token: token
+    });
   };
 
+  
+  const fetchCategories = async () => {
+    const url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories`;
+    const token = await AsyncStorage.getItem("token");
 
+    if (token) {
+      try {
+        const response = await axios.get(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
 
-  const fetchCategories = () => {
-    fetch("http://10.0.2.2:5000/categories", {
-      method: "GET",
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
+        const data = response.data;
+
+        //console.log("Data: ", data)
+        if (!Array.isArray(data)) {
+          console.error("Error: API response is not an array!", data);
+          return;
+        }
         // Use the base path to construct the image URLs
-        const categoriesItems = data
-          .map((item) => ({
+        const categoriesItems = data.map((item) => ({
             ...item,
             img_url: `${basePath}${item.img_name}`,
           }))
-          .filter((item) => item.type === "Expense");
-        setCategories(categoriesItems);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }
 
-  
-    useEffect(() => {
-     // If we received the updated categories list, set it
-     if (route.params?.updatedCategories) {
-      setCategories(route.params.updatedCategories);
-    } else {
-      // Otherwise, fetch the categories again (for initial load)
-      fetchCategories(); 
+        setCategories(categoriesItems);
+
+      } catch {
+        (error) => {
+          console.error("Error fetching data:", error);
+        };
+      }
+    } else{
+      console.error("No token");
     }
+  };
+
+  useEffect(() => {
+
+    try{
+      // If received the updated categories list, set it
+      if (updatedCategories) {
+        //console.log("setting updatedCategories.....:", updatedCategories)
+        setCategories(updatedCategories);
+      } else {
+        // Otherwise, fetch the categories again (for initial load)
+        fetchCategories();
+      }
+    }
+    catch(error){
+      console.error("Error fetching categories:", error)
+    
+  }
   }, [updatedCategories]);
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.headerCard}>
@@ -135,9 +170,7 @@ const CategoriesScreen = ({route}) => {
           <HorizontalLine />
         </View>
 
-        <TouchableOpacity
-          onPress={handleCreatePress}
-        >
+        <TouchableOpacity onPress={handleCreatePress}>
           <View style={styles.addButtonContainer}>
             {/* add new category button */}
             <Feather name="plus-circle" size={34} color="#277da1" />
@@ -155,13 +188,14 @@ const CategoriesScreen = ({route}) => {
         </TouchableOpacity>
       </View>
       <View style={styles.bodyCard}>
-      
-          {selectedButton === "Expense" && <ExpenseComponent selected="Expense" userId={userId}/>}
-          {selectedButton === "Income" && <IncomeComponent selected="Income" userId={userId}/>}
-        
-      
+        {selectedButton === "Expense" && (
+        <ExpenseComponent selected="Expense" userId={userId} token={token} updatedCategories={categories} />
+        )}
+        {selectedButton === "Income" && (
+        <IncomeComponent selected="Income" userId={userId} token={token} updatedCategories={categories}/>
+        )}
       </View>
-      <NeedHelp/>
+      <NeedHelp />
     </View>
   );
 };

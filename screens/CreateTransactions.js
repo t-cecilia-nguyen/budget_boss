@@ -31,32 +31,28 @@ const CreateTransactions = () => {
     const fetchUserData = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
+        if (!token) return;
+
         const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
 
-        if (token) {
-          const response = await fetch(backendUrl, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
+        const response = await axios.get(backendUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-          if (response.ok) {
-            const data = await response.json();
-            console.log("User ID: ", data.id);
-            setUserData({ id: data.id });
-          } else {
-            console.error('Failed to fetch user info:', response.statusText);
-            Alert.alert('Error', 'Unable to fetch user data.');
-          }
+        if (response.status === 200) {
+          setUserData(response.data);
+        } else {
+          console.error('Failed to fetch user data:', response.statusText);
+          Alert.alert('Error', 'Unable to fetch user data.');
         }
       } catch (error) {
-        console.error('Error fetching user info:', error);
+        console.error('Error fetching user data:', error);
         Alert.alert('Error', 'An error occurred while fetching user data.');
       }
     };
-
     fetchUserData();
   }, []);
 
@@ -64,8 +60,18 @@ const CreateTransactions = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       console.log(`Fetching categories for type: ${selectedTab}`);
+
       try {
-        const response = await axios.get(categories_url);
+        const token = await AsyncStorage.getItem('token');
+        if (!token) return;
+
+        const response = await axios.get(categories_url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
         if (response.status === 200) {
           setAllCategories(response.data); // Save all categories (both Income and Expense)
           // Now filter categories based on the selected tab

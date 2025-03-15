@@ -1,6 +1,8 @@
 import React from "react";
 import { View, StyleSheet, Dimensions, Text } from "react-native";
 
+
+/* This component provides a custom line*/
 const HorizontalLine = ({ width = "100%", style }) => {
   return <View style={[{ width }, styles.line, style]} />;
 };

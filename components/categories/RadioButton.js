@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 
+/* THis component provide custom radio button */
+
 const RadioButton = ({ selectedValue, onValueChange, options }) => {
   return (
     <View style={{ flexDirection: "row", marginVertical: 8 }}>
