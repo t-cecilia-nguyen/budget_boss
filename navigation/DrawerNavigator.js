@@ -16,11 +16,11 @@ import SettingsStackNavigator from './SettingsNavigator';
 
 // Import screens
 import MyAccount from '../screens/MyAccount';
-import Settings from '../screens/Settings';
 import CreateTransactions from '../screens/CreateTransactions';
 
 const Drawer = createDrawerNavigator();
 
+// Handle sign out
 const SignOut = ({ navigation }) => {
   const handleSignOut = async () => {
     try {
@@ -37,23 +37,29 @@ const SignOut = ({ navigation }) => {
     }
   };
 
+  // Sign out on component mount
   React.useEffect(() => {
     handleSignOut();
   }, []);
 
-  return null;
+  return null; // No UI for this screen
 };
 
+// Define custom drawer content (user profile)
 function CustomDrawerContent(props) {
   const [user, setUser] = useState({ name: "", email: "" });
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        // Get token from storage
         const token = await AsyncStorage.getItem("token");
+
+        // Backend URL
         const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
 
         if (token) {
+          // Fetch user data using token
           const response = await fetch(backendUrl, {
             method: "GET",
             headers: {
@@ -64,7 +70,7 @@ function CustomDrawerContent(props) {
 
           if (response.ok) {
             const data = await response.json();
-            console.log("User data: ", data);
+            // Set user info
             setUser({
               name: `${data.firstName} ${data.lastName}`,
               email: data.email,
@@ -78,7 +84,7 @@ function CustomDrawerContent(props) {
       }
     };
 
-    fetchUser();
+    fetchUser(); // Fetch user info
   }, []);
 
   return (
@@ -99,8 +105,9 @@ function CustomDrawerContent(props) {
   );
 }
 
+// Drawer Navigator
 export default function DrawerNavigator() {
-  const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState(null); // Store User ID
 
   return (
     <Drawer.Navigator
@@ -121,6 +128,7 @@ export default function DrawerNavigator() {
         drawerInactiveTintColor: Colors.greyBlue,
       }}
     >
+      {/* My Account */}
       <Drawer.Screen
         name="My Account"
         component={MyAccount}
@@ -135,6 +143,8 @@ export default function DrawerNavigator() {
           headerTitle: () => null,
         }}
       />
+
+      {/* Dashboard */}
       <Drawer.Screen
         name="Dashboard"
         component={BottomTabNavigator}
@@ -145,6 +155,8 @@ export default function DrawerNavigator() {
           headerTitle: () => null,
         }}
       />
+
+      {/* Create Transactions */}
       <Drawer.Screen
         name="Create Transactions"
         component={CreateTransactions}
@@ -157,6 +169,8 @@ export default function DrawerNavigator() {
         }}
         initialParams={{ userId }}
       />
+
+      {/* Settings */}
       <Drawer.Screen
         name="Settings"
         component={SettingsStackNavigator}
@@ -167,6 +181,8 @@ export default function DrawerNavigator() {
           headerTitle: () => null,
         }}
       />
+
+      {/* Sign Out */}
       <Drawer.Screen
         name="SignOut"
         component={SignOut}

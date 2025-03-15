@@ -1,9 +1,11 @@
 from flask import Blueprint, request, jsonify, current_app
 from database import get_db
 import jwt
+from werkzeug.security import generate_password_hash
 
 profile_bp = Blueprint('profile', __name__)
 
+# Retrieve user profile
 @profile_bp.route('/user', methods=['GET'])
 def get_profile():
     # Debug: Print when route hit
@@ -57,16 +59,20 @@ def get_profile():
     except Exception as e:
         print(f"Error: {e}")  # Debug: Print any errors
         return jsonify({"error": str(e)}), 500
-    
+
+# Update user profile    
 @profile_bp.route('/user', methods=['PUT'])
 def update_profile():
+    # Debug: Print when route hit
     print("Update profile route hit")
 
     try:
+        # Get Authorization header
         auth_header = request.headers.get('Authorization')
         if not auth_header or not auth_header.startswith("Bearer "):
             return jsonify({"error": "Authorization token is missing or invalid"}), 401
         
+        # Extract token
         token = auth_header.split(" ")[1]
 
         try:
@@ -78,13 +84,14 @@ def update_profile():
             if not user_id:
                 return jsonify({"error": "Invalid token"}), 401
 
-            # Update user profile
+            # Get user info from request
             data = request.get_json()
             print(f"Data: {data}")
             first_name = data.get('firstName')
             last_name = data.get('lastName')
             email = data.get('email')
 
+            # Validate user info
             if not first_name or not last_name or not email:
                 return jsonify({"error": "First name, last name, and email are required"}), 400
 
@@ -97,11 +104,72 @@ def update_profile():
             ''', (data['firstName'], data['lastName'], data['email'], user_id))
             db.commit()
 
-            return jsonify({"message": "Profile updated successfully"}), 200
+            # Return success message
+            return jsonify({"message": "Profile updated successfully"}), 200 
         
         except jwt.ExpiredSignatureError:
+            # Return error message: Token has expired
             return jsonify({"error": "Token has expired"}), 401
         except jwt.InvalidTokenError:
+            # Return error message: Invalid token
+            return jsonify({"error": "Invalid token"}), 401
+
+    except Exception as e:
+        print(f"Error: {e}")  # Debug: Print any errors
+        return jsonify({"error": str(e)}), 500
+    
+# Update user password
+@profile_bp.route('/password', methods=['PUT'])
+def update_password():
+    print("Update password route hit")
+
+    try:
+        # Get Authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Authorization token is missing or invalid"}), 401
+        
+        # Extract token
+        token = auth_header.split(" ")[1]
+
+        try:
+            # Verify token
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_id = payload.get('user_id')
+            print(f"Token payload: {payload}")
+
+            if not user_id:
+                return jsonify({"error": "Invalid token"}), 401
+
+            # Get new password from request
+            data = request.get_json()
+            print(f"Data: {data}")
+            new_password = data.get('password')
+
+            # Validate new password
+            if not new_password:
+                return jsonify({"error": "New password is required"}), 400
+
+            # Hash the new password
+            hashed_password = generate_password_hash(new_password)
+
+            # Update the password in the database
+            db = get_db()
+            db.execute('''
+                UPDATE users
+                SET password_hash = ?
+                WHERE id = ?
+            ''', (hashed_password, user_id))
+            db.commit()
+
+            # Return success message
+            return jsonify({"message": "Password updated successfully"}), 200
+        
+        except jwt.ExpiredSignatureError:
+            # Return error message: Token has expired
+            return jsonify({"error": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            # Return error message: Invalid token
             return jsonify({"error": "Invalid token"}), 401
 
     except Exception as e:

@@ -13,17 +13,22 @@ export default function ContactScreen() {
             {/* Divider */}
             <View style={styles.divider} />
 
+            {/* Contact Information */}
             <View style={styles.section}>
+
+                {/* Phone */}
                 <View style={styles.roundedItem}>
                     <FontAwesome name="phone" size={24} color={Colors.greyBlue} style={styles.icon} />
                     <Text style={styles.roundedText}>(416) 415-2000</Text>
                 </View>
 
+                {/* Email */}
                 <View style={styles.roundedItem}>
                     <FontAwesome name="envelope" size={24} color={Colors.greyBlue} style={styles.icon} />
                     <Text style={styles.roundedText}>contact@budgetboss.ca</Text>
                 </View>
 
+                {/* Address */}
                 <View style={styles.roundedItem}>
                     <FontAwesome name="map-pin" size={24} color={Colors.greyBlue} style={styles.icon} />
                     <Text style={styles.roundedText}>160 Kendal Ave{"\n"} Toronto, ON M5R 1M3</Text>
@@ -33,6 +38,7 @@ export default function ContactScreen() {
              {/* Divider */}
             <View style={styles.divider} />
 
+            {/* Members */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Members</Text>
                 {members.map((member, index) => (
