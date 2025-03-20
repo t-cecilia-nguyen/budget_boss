@@ -42,25 +42,31 @@ const ReportThisMonthComponent = ({
       );
     });
 
-    const filterBudgetByCurrentMonth = (entries) =>
-      entries.filter((entry) => {
-        const startDay = new Date(entry.start_date);
-        const endDay = new Date(entry.end_date);
+    // const filterBudgetByCurrentMonth = (entries) =>
+    //   entries.filter((entry) => {
+    //     const startDay = new Date(entry.start_date);
+    //     const endDay = new Date(entry.end_date);
 
-        return (
-          isValidDate(entry.start_date) &&
-          isValidDate(entry.end_date) &&
-          (
-            // Budget starts or ends in the current month
-            (startDay.getUTCMonth() === currentMonth && startDay.getUTCFullYear() === currentYear) ||
-            (endDay.getUTCMonth() === currentMonth && endDay.getUTCFullYear() === currentYear) ||
+    //     return (
+    //       isValidDate(entry.start_date) &&
+    //       isValidDate(entry.end_date) &&
+    //       (
+    //         // Budget starts or ends in the current month
+    //         (startDay.getUTCMonth() === currentMonth && startDay.getUTCFullYear() === currentYear) ||
+    //         (endDay.getUTCMonth() === currentMonth && endDay.getUTCFullYear() === currentYear) ||
     
-            // Budget spans across the current month
-            (startDay.getUTCMonth() <= currentMonth && endDay.getUTCMonth() >= currentMonth && startDay.getUTCFullYear() === currentYear)
-          )
-        );
-      });
+    //         // Budget spans across the current month
+    //         (startDay.getUTCMonth() <= currentMonth && endDay.getUTCMonth() >= currentMonth && startDay.getUTCFullYear() === currentYear)
+    //       )
+    //     );
+    //   });
    
+    const filterBudgetByCurrentMonth = (entries) => {
+      return entries.map((entry) => ({
+          ...entry,
+          category_budget: Number(entry.category_budget) || 0, 
+      }));
+    };
 
 
   const filteredExpenseTransactions = filterByCurrentMonth(expenseTransactions);
@@ -81,7 +87,7 @@ const totalExpense = filteredExpenseTransactions.reduce(
   0
 );
 const totalBudget = filteredBudgetEntries.reduce(
-  (sum, txn) => sum + txn.amount,
+  (sum, txn) => sum + txn.category_budget,
   0
 );
 

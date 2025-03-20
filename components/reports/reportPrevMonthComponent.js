@@ -38,23 +38,30 @@ const ReportPrevMonthComponent = ({
       );
     });
 
-  const filterBudgetsByPrevMonth = (entries) =>
-    entries.filter((entry) => {
-      const startDay = new Date(entry.start_date);
-      const endDay = new Date(entry.end_date);
-      return (
-        isValidDate(entry.start_date) &&
-        isValidDate(entry.end_date) &&
-        (
-          // Budget starts or ends in the previous month
-          (startDay.getUTCMonth() === prevMonth && startDay.getUTCFullYear() === currentYear) ||
-          (endDay.getUTCMonth() === prevMonth && endDay.getUTCFullYear() === currentYear) ||
+  // const filterBudgetsByPrevMonth = (entries) =>
+  //   entries.filter((entry) => {
+  //     const startDay = new Date(entry.start_date);
+  //     const endDay = new Date(entry.end_date);
+  //     return (
+  //       isValidDate(entry.start_date) &&
+  //       isValidDate(entry.end_date) &&
+  //       (
+  //         // Budget starts or ends in the previous month
+  //         (startDay.getUTCMonth() === prevMonth && startDay.getUTCFullYear() === currentYear) ||
+  //         (endDay.getUTCMonth() === prevMonth && endDay.getUTCFullYear() === currentYear) ||
   
-          // Budget spans across the previous month
-          (startDay.getUTCMonth() <= prevMonth && endDay.getUTCMonth() >= prevMonth && startDay.getUTCFullYear() === currentYear)
-        )
-      );
-    });
+  //         // Budget spans across the previous month
+  //         (startDay.getUTCMonth() <= prevMonth && endDay.getUTCMonth() >= prevMonth && startDay.getUTCFullYear() === currentYear)
+  //       )
+  //     );
+  //   });
+
+  const filterBudgetsByPrevMonth = (entries) => {
+    return entries.map((entry) => ({
+        ...entry,
+        category_budget: Number(entry.category_budget) || 0, 
+    }));
+  };
 
   const filteredExpenseTransactions = filterByPrevMonth(expenseTransactions);
   const filteredBudgets = filterBudgetsByPrevMonth(budgets);
@@ -75,7 +82,7 @@ const ReportPrevMonthComponent = ({
     0
   );
   const totalBudget = filteredBudgets.reduce(
-    (sum, txn) => sum + txn.amount,
+    (sum, txn) => sum + txn.category_budget,
     0
   );
 
@@ -155,6 +162,7 @@ const ReportPrevMonthComponent = ({
 };
 
 export default ReportPrevMonthComponent;
+
 const styles = StyleSheet.create({
   amountYouCanSpend: {
     marginTop: 20,
