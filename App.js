@@ -6,14 +6,17 @@ import Login from './screens/Login';
 import SignUp from './screens/SignUp';
 import CreateTransactions from './screens/CreateTransactions';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
+import SplashScreen from './screens/SplashScreen';
 
 const Stack = createStackNavigator();
 
 export default function App() {
 	return (
 			<NavigationContainer>
-				{/* Set default screen to Login */}
-				<Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+				<Stack.Navigator initialRouteName="SplashScreen" screenOptions={{ headerShown: false }}>
+					{/* Splash Screen */}
+					<Stack.Screen name="SplashScreen" component={SplashScreen} />
+
 					{/* Main Drawer Navigator */}	
 					<Stack.Screen name="DrawerNavigator" component={DrawerNavigator} />
 

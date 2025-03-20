@@ -92,7 +92,7 @@ function CustomDrawerContent(props) {
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <Image
-          source={require("../assets/icon.png")} // Profile picture
+          source={require("../assets/yellow-logo.png")} // Profile picture
           style={styles.profileImage}
         />
         <Text style={styles.profileName}>{user.name}</Text>
