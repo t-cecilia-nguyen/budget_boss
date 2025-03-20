@@ -175,3 +175,48 @@ def update_password():
     except Exception as e:
         print(f"Error: {e}")  # Debug: Print any errors
         return jsonify({"error": str(e)}), 500
+    
+
+# Delete user account
+@profile_bp.route('/delete', methods=['DELETE'])
+def delete_user():
+    print("Delete user route hit")
+
+    try:
+        # Get Authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return jsonify({"error": "Authorization token is missing or invalid"}), 401
+        
+        # Extract token
+        token = auth_header.split(" ")[1]
+
+        try:
+            # Verify token
+            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_id = payload.get('user_id')
+            print(f"Token payload: {payload}")
+
+            if not user_id:
+                return jsonify({"error": "Invalid token"}), 401
+            
+            # Get database connection and enable foreign key constraints
+            db = get_db()
+            db.execute('PRAGMA foreign_keys = ON;')
+
+            # Delete user from database
+            db.execute('''DELETE FROM users WHERE id = ?''', (user_id,))
+            db.commit()
+
+            # Return success message
+            return jsonify({"message": "User deleted successfully"}), 200
+        
+        except jwt.ExpiredSignatureError:
+            # Return error message: Token has expired
+            return jsonify({"error": "Token has expired"}), 401
+        except jwt.InvalidTokenError:
+            # Return error message: Invalid token
+            return jsonify({"error": "Invalid token"}), 401     
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"error": str(e)}), 500

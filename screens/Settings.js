@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
-import { Colors } from '../assets/colors';
 import { useNavigation } from '@react-navigation/native';
+import { Colors } from '../assets/colors';
+import DeleteAccountButton from '../components/DeleteAccountButton';
 
 export default function Settings() {
     const [isEnabled, setIsEnabled] = useState(false);
@@ -55,12 +56,11 @@ export default function Settings() {
             <View style={styles.emptySection}></View>
 
             {/* Delete Account button */}
-            <TouchableOpacity style={styles.deleteContainer} onPress={() => navigation.navigate('SubmitFeedback')}>
-                <Text style={[styles.text, styles.textDelete]}>Delete Account</Text>
-            </TouchableOpacity>
+            <DeleteAccountButton navigation={navigation} />
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
