@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity, Button } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons'; 
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
+import Toast from 'react-native-toast-message';
+import { set } from 'date-fns';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const TransactionsScreen = () => {
     const [transactions, setTransactions] = useState([]);
@@ -21,9 +25,32 @@ const TransactionsScreen = () => {
     const [openYear, setOpenYear] = useState(false);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
+    const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
+    const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+    const balance = parseFloat((inflow - outflow).toFixed(2));
+
     useEffect(() => {
         fetchTransactions();
     }, [selectedMonth, selectedYear]);
+
+    // Function to show the toast (for balance)
+    const showToast = () => {
+        console.log("Balance:", balance);
+        if (balance < 0) {
+            Toast.show({
+            text1: 'Your balance is negative: ' + balance,
+            position: 'bottom',
+            type: 'error',
+            visibilityTime: 4000,
+            });
+        }   
+    };  
+
+    // Show toast when balance changes
+    useEffect(() => {
+        if (loading) return;  // Prevent showing toast during loading
+        showToast();
+    }, [balance]); 
 
     const fetchTransactions = async () => {
         setLoading(true);
@@ -135,10 +162,6 @@ const TransactionsScreen = () => {
         return groups;
     }, {});
 
-    const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-    const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
-    const balance = parseFloat((inflow - outflow).toFixed(2));
-
     const monthItems = [
         { label: "January", value: 1 },
         { label: "February", value: 2 },
@@ -202,6 +225,8 @@ const TransactionsScreen = () => {
             ))}
         </View>
     );
+
+
 
     return (
         <View style={styles.container}>
@@ -276,6 +301,9 @@ const TransactionsScreen = () => {
                 renderItem={renderGroupItem}
                 keyExtractor={(item, index) => item[0].date + index.toString()}  
             />
+
+            {/* Toast component */}
+            <Toast />
         </View>
     );
 };
@@ -360,10 +388,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     inflow: {
-        color: Colors.red,
+        color: Colors.green,
     },
     outflow: {
-        color: Colors.green,
+        color: Colors.red,
     },
     balanceText: {
         alignSelf: 'center',
