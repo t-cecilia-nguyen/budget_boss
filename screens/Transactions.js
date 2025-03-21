@@ -8,8 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
 import Toast from 'react-native-toast-message';
 import { set } from 'date-fns';
-import { useFocusEffect } from '@react-navigation/native';
-
 
 const TransactionsScreen = () => {
     const [transactions, setTransactions] = useState([]);
@@ -28,22 +26,55 @@ const TransactionsScreen = () => {
     const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
     const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
     const balance = parseFloat((inflow - outflow).toFixed(2));
+    const balancePercentage = balance / inflow * 100;
 
     useEffect(() => {
         fetchTransactions();
     }, [selectedMonth, selectedYear]);
 
+    // Categorize balance based on percentage
+    let balanceCategory = '';
+    if (balance < 0) {
+        balanceCategory = 'negative';
+    } else if (balancePercentage > 50) {
+        balanceCategory = 'surplus';
+    } else if (balancePercentage < 20) {
+        balanceCategory = 'low';
+    }
+
     // Function to show the toast (for balance)
     const showToast = () => {
         console.log("Balance:", balance);
-        if (balance < 0) {
+
+        // Show toast based on balance category
+        if (balanceCategory === 'negative') {
             Toast.show({
-            text1: 'Your balance is negative: ' + balance,
-            position: 'bottom',
-            type: 'error',
-            visibilityTime: 4000,
+                text1: 'Warning: Your balance is negative!',
+                text2: 'Please review your transactions and adjust your budget.',
+                position: 'top',
+                topOffset: 8,
+                type: 'error',
+                visibilityTime: 4000,
             });
-        }   
+        } else if (balanceCategory === 'surplus') {
+            Toast.show({
+                text1: `Great! Your balance is positive.`,
+                text2: "You're doing great with your finances!",
+                position: 'top',
+                topOffset: 8,
+                type: 'success',
+                visibilityTime: 4000,
+            });
+        } else if (balanceCategory === 'low') {
+            Toast.show({
+                text1: `Warning: Your balance is low!`,
+                text2: "You have less than 20% of your income left.",
+                position: 'top',
+                topOffset: 8,
+                type: 'error',
+                visibilityTime: 4000,
+            });
+        }
     };  
 
     // Show toast when balance changes
@@ -226,8 +257,6 @@ const TransactionsScreen = () => {
         </View>
     );
 
-
-
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
@@ -291,7 +320,6 @@ const TransactionsScreen = () => {
                 </View>
             </View>
             
-
             <FlatList
                 // ListEmptyComponent rendered when there are no transactions recorded
                 ListEmptyComponent={() => (
