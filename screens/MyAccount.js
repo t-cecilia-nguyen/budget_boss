@@ -150,6 +150,9 @@ const MyAccountScreen = ({ navigation }) => {
                 />
             </View>
 
+            {/* Empty section for spacing */}
+            <View style={styles.emptySection}></View>
+
             {/* Save */}
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
                 <Text style={styles.buttonText}>SAVE</Text>
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#CCC',
-        borderRadius: 8,
+        borderRadius: 20,
         backgroundColor: '#FFF',
         marginBottom: 15,
         paddingLeft: 10,
@@ -194,10 +197,13 @@ const styles = StyleSheet.create({
     icon: {
         color: Colors.darkBlue,
     },
+    emptySection: {
+        flex: 1,
+    },
     button: {
         backgroundColor: Colors.primaryBlue,
         padding: 15,
-        borderRadius: 8,
+        borderRadius: 20,
         alignItems: 'center',
     },
     buttonText: {

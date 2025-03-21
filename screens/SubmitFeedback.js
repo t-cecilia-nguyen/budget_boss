@@ -64,7 +64,7 @@ export default function SubmitFeedbackScreen() {
     };    
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
             {/* Feedback Title */}
             <Text style={styles.title}>Share your feedback</Text>
 
@@ -98,11 +98,14 @@ export default function SubmitFeedbackScreen() {
                 />
             </View>
 
+            {/* Empty section for spacing */}
+            <View style={styles.emptySection}></View>
+
             {/* Submit button */}
             <TouchableOpacity style={styles.button} onPress={submit}>
                 <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
-        </ScrollView>
+        </View>
     );
 }
 
@@ -168,6 +171,9 @@ const styles = StyleSheet.create({
         color: Colors.darkBlue,
         height: 150,
         textAlignVertical: 'top',
+    },
+    emptySection: {
+        flex: 1,
     },
     button: {
         backgroundColor: Colors.primaryBlue,

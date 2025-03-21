@@ -135,6 +135,9 @@ const LoginSecurityScreen = ({ navigation }) => {
             </View>
             <Text style={getErrorTextStyle('confirmPassword')}>{errors.confirmPassword}</Text>
 
+            {/* Empty section for spacing */}
+            <View style={styles.emptySection}></View>
+
             {/* Save Button */}
             <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>SAVE</Text>}
@@ -166,7 +169,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#CCC',
-        borderRadius: 8,
+        borderRadius: 20,
         backgroundColor: '#FFF',
         paddingLeft: 10,
     },
@@ -178,11 +181,14 @@ const styles = StyleSheet.create({
     icon: {
         color: Colors.darkBlue,
     },
+    emptySection: {
+        flex: 1,
+    },
     button: {
         backgroundColor: Colors.primaryBlue,
         padding: 15,
         marginTop: 20,
-        borderRadius: 8,
+        borderRadius: 20,
         alignItems: 'center',
     },
     buttonText: {
