@@ -55,12 +55,8 @@ const TransactionsScreen = () => {
     
             setTransactions(response.data);
         } catch (err) {
-            console.warn('Failed to fetch transactions for selected month/year. Reverting to current month.');
-    
-            // Fallback to current month and year
-            const currentMonth = new Date().getMonth() + 1;
-            const currentYear = new Date().getFullYear();
-    
+            console.warn(`No transactions found for ${selectedMonth}/${selectedYear}`);
+
             try {
                 const token = await AsyncStorage.getItem('token');
                 const userProfileUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
@@ -141,7 +137,7 @@ const TransactionsScreen = () => {
 
     const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
     const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
-    const balance = inflow - outflow;
+    const balance = parseFloat((inflow - outflow).toFixed(2));
 
     const monthItems = [
         { label: "January", value: 1 },
@@ -161,8 +157,7 @@ const TransactionsScreen = () => {
     const renderItem = ({ item }) => (
         <TouchableOpacity 
             style={styles.transactionItem} 
-            onPress={() => setSelectedTransactionId(item.id === selectedTransactionId ? null : item.id)}
-        >
+            onPress={() => setSelectedTransactionId(item.id === selectedTransactionId ? null : item.id)}>
             <View style={styles.transactionDetails}>
                 <View style={styles.categoryRow}>
                     {item.icon ? (
@@ -189,7 +184,9 @@ const TransactionsScreen = () => {
                         )}
                     </View>
                 </View>
-                <Text style={styles.transactionDescription}>{item.note || '-'}</Text>
+                {item.note ? (
+                    <Text style={styles.transactionDescription}>{item.note}</Text>
+                ) : null}
             </View>
         </TouchableOpacity>
     );
@@ -268,8 +265,13 @@ const TransactionsScreen = () => {
                     </View>
                 </View>
             </View>
+            
 
             <FlatList
+                // ListEmptyComponent rendered when there are no transactions recorded
+                ListEmptyComponent={() => (
+                    <Text style={styles.noRecordsText}>No transaction records found for {monthItems.find(item => item.value === selectedMonth)?.label} {selectedYear}.</Text>
+                )}
                 data={Object.values(groupedTransactions)}
                 renderItem={renderGroupItem}
                 keyExtractor={(item, index) => item[0].date + index.toString()}  
@@ -321,7 +323,7 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        marginBottom: 16,
+        marginBottom: 10,
         borderColor: Colors.grey,
         borderWidth: 1,
     },
@@ -356,10 +358,10 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     inflow: {
-        color: '#28a745',
+        color: Colors.red,
     },
     outflow: {
-        color: '#dc3545',
+        color: Colors.green,
     },
     balanceLabel: {
         fontSize: 16,
@@ -369,6 +371,11 @@ const styles = StyleSheet.create({
     balanceValue: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    categoryRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
     },
     transactionCard: {
         backgroundColor: '#ffffff',
@@ -393,19 +400,29 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
+    transactionAmount: {
+        marginRight: 10,
+    },
     icon: {
         width: 20,
         height: 20,
+        marginRight: 10,
+        marginLeft: -10,
     },
     transactionCategory: {
         fontSize: 16,
         fontWeight: 'bold',
-        marginLeft: 8,
     },
     transactionDescription: {
         fontSize: 14,
         color: '#777',
         marginTop: 4,
+        marginLeft: -10,
+    },
+    noRecordsText: {
+        color: Colors.greyBlue,
+        fontSize: 16,
+        textAlign: 'center',
     },
 });
 
