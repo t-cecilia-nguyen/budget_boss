@@ -87,7 +87,7 @@ const TransactionsScreen = () => {
                 setSelectedMonth(currentMonth);
                 setSelectedYear(currentYear);
             } catch (fallbackErr) {
-                console.error("No transactions found.");
+                console.log("No transactions found.");
                 setTransactions([]); 
             }
         } finally {

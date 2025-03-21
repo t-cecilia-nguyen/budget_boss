@@ -48,12 +48,19 @@ const ReportsScreen = () => {
                 }
             );
 
+            if (transactionsResponse.data.length === 0) {
+              console.log("No transactions found");
+              setIncomeTransactions([]); 
+              setExpenseTransactions([]);
+              return;
+          }
+
             const allTransactions = transactionsResponse.data;
             setIncomeTransactions(allTransactions.filter((txn) => txn.type === "income"));
             setExpenseTransactions(allTransactions.filter((txn) => txn.type === "expense"));
         } catch (error) {
-            console.error("Error fetching transactions:", error);
-            Alert.alert("Error", "Failed to load transaction data.");
+            console.log("Error fetching transactions:", error);
+
         }
     };
 
@@ -89,12 +96,11 @@ const ReportsScreen = () => {
           if (Array.isArray(response.data) && response.data.length > 0) {
               setBudgets(response.data);
           } else {
-              console.log("No budgets returned from API.");
+              console.log("No budgets found.");
               setBudgets([]);
           }
       } catch (error) {
-          console.error("Error fetching budgets:", error.response?.data || error);
-          Alert.alert("Error", "Failed to load budget data.");
+          console.log("Error fetching budgets:", error.response?.data || error);
       }
   };
 
