@@ -142,6 +142,21 @@ const TransactionsScreen = () => {
     const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
     const balance = inflow - outflow;
 
+    const monthItems = [
+        { label: "January", value: 1 },
+        { label: "February", value: 2 },
+        { label: "March", value: 3 },
+        { label: "April", value: 4 },
+        { label: "May", value: 5 },
+        { label: "June", value: 6 },
+        { label: "July", value: 7 },
+        { label: "August", value: 8 },
+        { label: "September", value: 9 },
+        { label: "October", value: 10 },
+        { label: "November", value: 11 },
+        { label: "December", value: 12 },
+    ];
+    
     const renderItem = ({ item }) => (
         <TouchableOpacity 
             style={styles.transactionItem} 
@@ -196,13 +211,10 @@ const TransactionsScreen = () => {
                     <DropDownPicker
                         open={openMonth}
                         value={selectedMonth}
-                        items={[...Array(12).keys()].map((i) => ({
-                            label: new Date(0, i).toLocaleString('en-US', { month: 'long' }),
-                            value: i + 1,
-                        }))}
+                        items={monthItems}
                         setOpen={setOpenMonth}
                         setValue={setSelectedMonth}
-                        placeholder="Month"
+                        placeholder="Select Month"
                         containerStyle={styles.dropdownContainer}
                         style={styles.dropdown}
                     />
