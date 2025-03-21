@@ -8,9 +8,9 @@ SplashScreen.preventAutoHideAsync();
 const SplashScreenComponent = ({ navigation }) => {
     useEffect(() => {
         const hideSplash = async () => {
-        await new Promise(resolve => setTimeout(resolve, 5000)); // 5 seconds
+        await new Promise(resolve => setTimeout(resolve, 3000)); // 3 seconds
         await SplashScreen.hideAsync();
-        navigation.replace("Login"); // Navigate to login screen
+        navigation.replace("Login"); // Navigate to the login screen
         };
 
         hideSplash();

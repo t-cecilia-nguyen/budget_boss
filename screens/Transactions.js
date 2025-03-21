@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons'; 
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Colors } from '../assets/colors';
 
 const TransactionsScreen = () => {
     const [transactions, setTransactions] = useState([]);
@@ -188,9 +189,11 @@ const TransactionsScreen = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.headerRow}>
-                <Text style={styles.header}>My Transactions</Text>
+            <View style={styles.headerContainer}>
+                <Text style={styles.header}>Transactions</Text>
+            </View>
 
+            <View style={styles.headerRow}>
                 {/* Dropdowns for month and year selection */}
                 <View style={styles.dropdownWrapper}>
                     <DropDownPicker
@@ -261,10 +264,33 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#F8F8F8',
     },
+    headerContainer: {
+        alignItems: 'center',
+    },    
     header: {
-        fontSize: 24,
+        fontSize: 30,
         fontWeight: 'bold',
+        marginBottom: 20,
+        color: Colors.primaryBlue,
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: 16,
+    },
+    dropdownWrapper: {
+        flexDirection: 'row',
+        flex: 1,
+        justifyContent: 'space-between',
+    },
+    dropdownContainer: {
+        flex: 1,
+        marginHorizontal: 10,
+    },
+    dropdown: {
+        backgroundColor: '#fff',
+        width: '100%',
     },
     balanceContainer: {
         backgroundColor: '#ffffff',
@@ -357,26 +383,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#777',
         marginTop: 4,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    dropdownWrapper: {
-        flexDirection: 'row',
-    },
-    dropdownContainer: {
-        width: 120,
-        marginLeft: 10,
-    },
-    dropdown: {
-        backgroundColor: '#fff',
-    },
-    header: {
-        fontSize: 24,
-        fontWeight: 'bold',
     },
 });
 
