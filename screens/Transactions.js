@@ -178,7 +178,7 @@ const TransactionsScreen = () => {
                     <View style={styles.transactionHeader}>
                         <Text style={styles.transactionCategory}>{item.category}</Text>
 
-                        <Text style={[styles.transactionAmount, item.type === 'income' ? styles.income : styles.expense]}>
+                        <Text style={[styles.transactionAmount, item.type === 'income' ? styles.inflow : styles.outflow]}>
                             {item.type === 'income' ? `+${item.amount}` : `-${item.amount}`}
                         </Text>
 
@@ -198,7 +198,11 @@ const TransactionsScreen = () => {
         <View style={styles.transactionCard}>
             <Text style={styles.groupDate}>{item[0].date}</Text>
             <View style={styles.separatorLine}></View>
-            {item.map(transaction => renderItem({ item: transaction }))}
+            {item.map(transaction => (
+                <View key={transaction.id}>
+                    {renderItem({ item: transaction })}
+                </View>
+            ))}
         </View>
     );
 
@@ -220,6 +224,7 @@ const TransactionsScreen = () => {
                         placeholder="Select Month"
                         containerStyle={styles.dropdownContainer}
                         style={styles.dropdown}
+                        
                     />
                     <DropDownPicker
                         open={openYear}
@@ -257,7 +262,9 @@ const TransactionsScreen = () => {
                     <View style={styles.separatorLine}></View>
                     <View style={styles.row}>
                         <Text style={styles.balanceLabel}>Balance</Text>
-                        <Text style={styles.balanceValue}>{balance}</Text>
+                        <Text style={[styles.balanceValue, balance < 0 ? styles.outflow : styles.inflow]}>
+                            {balance}
+                        </Text>     
                     </View>
                 </View>
             </View>
@@ -275,6 +282,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         backgroundColor: '#F8F8F8',
+        flexGrow: 1
     },
     headerContainer: {
         alignItems: 'center',
@@ -301,6 +309,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 10,
     },
     dropdown: {
+        borderColor: Colors.grey,
         backgroundColor: '#fff',
         width: '100%',
     },
@@ -312,8 +321,9 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
         marginBottom: 16,
+        borderColor: Colors.grey,
+        borderWidth: 1,
     },
     progressBar: {
         height: 10,
@@ -369,7 +379,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
-        elevation: 2,
+        borderColor: Colors.grey,
+        borderWidth: 1,
     },
     transactionHeader: {
         flexDirection: 'row',
