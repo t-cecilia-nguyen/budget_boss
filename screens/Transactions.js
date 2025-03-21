@@ -240,7 +240,7 @@ const TransactionsScreen = () => {
             </View>
 
             <View style={styles.balanceContainer}>
-                <Text style={styles.balanceText}>This Month</Text>
+                <Text style={styles.balanceText}>{monthItems.find(item => item.value === selectedMonth)?.label} {selectedYear}</Text>
                 <View style={styles.separatorLine}></View>
                 <View style={styles.progressBar}>
                     <View style={[styles.progressFill, { flex: inflow / (inflow + outflow || 1) }]} />
@@ -308,16 +308,18 @@ const styles = StyleSheet.create({
     },
     dropdownContainer: {
         flex: 1,
-        marginHorizontal: 10,
+        marginHorizontal: 5,
     },
     dropdown: {
         borderColor: Colors.grey,
         backgroundColor: '#fff',
         width: '100%',
+        minHeight: 40,
     },
     balanceContainer: {
         backgroundColor: '#ffffff',
-        padding: 16,
+        paddingHorizontal: 10,
+        paddingTop: 10,
         borderRadius: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
@@ -363,6 +365,11 @@ const styles = StyleSheet.create({
     outflow: {
         color: Colors.green,
     },
+    balanceText: {
+        alignSelf: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     balanceLabel: {
         fontSize: 16,
         fontWeight: '600',
@@ -396,7 +403,7 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     transactionItem: {
-        padding: 12,
+        padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
