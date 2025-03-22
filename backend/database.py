@@ -2,8 +2,8 @@ import sqlite3
 from flask import g
 import os
 
-DATABASE = os.path.join(os.path.dirname(__file__), 'database.db')
-#DATABASE = "./database.db"
+#DATABASE = os.path.join(os.path.dirname(__file__), 'database.db')
+DATABASE = "./database.db"
 
 print(f"Database path: {DATABASE}")
 
