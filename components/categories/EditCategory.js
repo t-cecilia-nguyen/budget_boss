@@ -9,18 +9,21 @@ import {
   Image,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Constants from "expo-constants";
+import axios from "axios";
 
 
 import IconPicker from "./IconPicker";
 
 
-const basePath = "http://10.0.2.2:5000/uploads/";
+const basePath = `${Constants.expoConfig.extra.API_BACKEND_URL}/uploads/`;
 
 const EditCategory = ({ route, navigation }) => {
-  const { data, userId, selected } = route.params || {};
+  const { data, userId, selected , token} = route.params || {};
 
   // console.log("userid from edit:", userId);
   // console.log("selectedbutton from edit:", selected);
+  console.log("token from edit:", token);
 
   // Initialize state for category fields
   const categoryId = data.category_id;
@@ -34,85 +37,7 @@ const EditCategory = ({ route, navigation }) => {
   );
 
 
-    // Fetch categories after updating one
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("http://10.0.2.2:5000/categories");
-        const data = await response.json();
-        return data; // Return the updated list of categories
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        return [];
-      }
-    };
-
-  ////////// Delete Category
-  const handleDatabaseDelete = async (categoryId) => {
-    try {
-      const response = await fetch("http://10.0.2.2:5000/categories/delete", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: categoryId, user_id: userId }),
-      });
-
-      if (response.ok) {
-        console.log("Category deleted successfully: "+ categoryName);
-
-      } else {
-        console.error("Failed to delete category:", response.status);
-        alert("Failed to delete category. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      alert("An error occurred while deleting the category. Please try again.");
-    }
-  };
-  const handleDelete = async (categoryId) => {
-    const updatedList = await fetchCategories();
-    Alert.alert(
-      "Delete Category",
-      "Are you sure you want to delete this category?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            // Perform delete logic
-            await handleDatabaseDelete(categoryId);
-            console.log("Category deleted : "+ categoryName);
-            // Pass updated categories list back to the parent screen
-            navigation.navigate("CategoriesList", {
-              updatedCategories: updatedList,
-              userId,
-              selected,
-            });
-          },
-        },
-      ]
-    );
-  };
-
-  // delete Icon
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => handleDelete(categoryId)}
-          style={styles.headerIcon}
-        >
-          <AntDesign name="delete" size={24} color="red" />
-        </TouchableOpacity>
-      ),
-    });
-  }, [navigation]);
-
-  //////////
+  ////////// update
 
   useEffect(() => {
     // If data is passed, set the form fields
@@ -124,6 +49,35 @@ const EditCategory = ({ route, navigation }) => {
     }
   }, [data]);
 
+  const fetchCategories = async () => {
+    const url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories`;
+
+    
+      try {
+        const response = await axios.get(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = response.data;
+
+        // Use the base path to construct the image URLs
+        const categoriesItems = data.map((item) => ({
+            ...item,
+            img_url: `${basePath}${item.img_name}`,
+          }))
+
+        return categoriesItems;
+
+      } catch {
+        (error) => {
+          console.error("Error fetching data:", error);
+          return [];
+        };
+      }
+  
+  };
 
   // Update Category
   const handleSave = async () => {
@@ -136,8 +90,6 @@ const EditCategory = ({ route, navigation }) => {
       img_name: categoryImage,
     });
 
-    //@TODO: SAVE TO DATABASE
-
     const updatedCategory = {
       category_id: categoryId,
       userId,
@@ -147,16 +99,21 @@ const EditCategory = ({ route, navigation }) => {
       img_name: categoryImage && categoryImage !== "" ? categoryImage : "default.png",
     };
 
+    if (!updatedCategory.name || updatedCategory.name.trim() === "") {
+      alert("Category name cannot be empty.");
+      return;
+    }
     try {
-      const response = await fetch("http://10.0.2.2:5000/categories/update", {
+      const url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories/update`;
+      const response = await axios.put(url, updatedCategory, {
         method: "PUT",
         headers: {
+          'Authorization': `Bearer ${token}`,
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedCategory),
+        }     
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         console.log("Category updated successfully:", updatedCategory);
         // Fetch updated categories after editing
         const updatedList = await fetchCategories();
@@ -182,6 +139,86 @@ const EditCategory = ({ route, navigation }) => {
     }
   };
 
+
+
+
+
+
+  
+  ////////// Delete Category
+  const handleDatabaseDelete = async (categoryId) => {
+   
+    const url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories/delete?id=${categoryId}`;
+
+    console.log("token in deleting cat:", token)
+    console.log("Category ID being sent:", categoryId);
+
+    if (token) {
+      try {
+        const response = await axios.delete(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+
+        if (response.status === 200) {
+          console.log("Category deleted successfully: "+ categoryName);
+
+        } else {
+          console.error("Failed to delete category:", response.status);
+          alert("Failed to delete category. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        alert("An error occurred while deleting the category. Please try again.");
+      }
+    }
+};
+const handleDelete = async (categoryId) => {
+  
+  Alert.alert(
+    "Delete Category",
+    "Are you sure you want to delete this category?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          // Perform delete logic
+          await handleDatabaseDelete(categoryId);
+          const updatedList = await fetchCategories();
+          //console.log("Updated list: ", updatedList)
+          console.log("Category deleted : "+ categoryName);
+          // Pass updated categories list back to the parent screen
+          navigation.navigate("CategoriesList", {
+            updatedCategories: updatedList,
+            userId,
+            selected,
+          });
+        },
+      },
+    ]
+  );
+};
+
+// delete Icon
+React.useLayoutEffect(() => {
+  navigation.setOptions({
+    headerRight: () => (
+      <TouchableOpacity
+        onPress={() => handleDelete(categoryId)}
+        style={styles.headerIcon}
+      >
+        <AntDesign name="delete" size={24} color="red" />
+      </TouchableOpacity>
+    ),
+  });
+}, [navigation]);
+
   return (
     <View style={styles.container}>
       <View style={styles.rowBox}>
@@ -190,22 +227,7 @@ const EditCategory = ({ route, navigation }) => {
       basePath={basePath}
       onImageSelect={(selectedImage) => setCategoryImage(selectedImage)}
       />
-        {/*<View style={styles.imageBox}>
-          {/* image 
-          {categoryImage ? (
-            <Image
-              style={styles.categoryImage}
-              source={{ uri: `${basePath}${categoryImage}` }}
-              resizeMode="center"
-            />
-          ) : (
-            <Image
-              style={styles.categoryImage}
-              source={require("../../assets/categories/default.png")}
-              resizeMode="center"
-            />
-          )}
-        </View>*/}
+        
       
         <View style={styles.infoBox}>
           {/* category name */}

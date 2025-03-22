@@ -4,29 +4,29 @@ import { PieChart } from 'react-native-chart-kit';
 
 const OverviewScreen = () => {
     // Define data for different months
-   const monthlyData = {
-       October: [
-           { name: 'Rent', amount: 1800, color: '#277DA1' },
-           { name: 'Food', amount: 800, color: '#F94144' },
-           { name: 'Fitness', amount: 100, color: '#F9844A' },
-           { name: 'Shopping', amount: 30, color: '#F9C74F' },
-           { name: 'Medical', amount: 200, color: '#90BE6D' },
-       ],
-       November: [
-           { name: 'Rent', amount: 1800, color: '#277DA1' },
-           { name: 'Food', amount: 400, color: '#F94144' },
-           { name: 'Fitness', amount: 100, color: '#F9844A' },
-           { name: 'Shopping', amount: 80, color: '#F9C74F' },
-       ],
-       December: [
-           { name: 'Rent', amount: 1800, color: '#277DA1' },
-           { name: 'Food', amount: 500, color: '#F94144' },
-           { name: 'Fitness', amount: 120, color: '#F9844A' },
-           { name: 'Insurance', amount: 350, color: '#F9C74F' },
-           { name: 'Beauty', amount: 100, color: '#90BE6D' },
-           { name: 'Vacation', amount: 450, color: '#BECAE6' },
-       ],
-   };
+    const monthlyData = {
+        October: [
+            { name: 'Rent', amount: 1800, color: '#277DA1' },
+            { name: 'Food', amount: 800, color: '#F94144' },
+            { name: 'Fitness', amount: 100, color: '#F9844A' },
+            { name: 'Shopping', amount: 30, color: '#F9C74F' },
+            { name: 'Medical', amount: 200, color: '#90BE6D' },
+        ],
+        November: [
+            { name: 'Rent', amount: 1800, color: '#277DA1' },
+            { name: 'Food', amount: 400, color: '#F94144' },
+            { name: 'Fitness', amount: 100, color: '#F9844A' },
+            { name: 'Shopping', amount: 80, color: '#F9C74F' },
+        ],
+        December: [
+            { name: 'Rent', amount: 1800, color: '#277DA1' },
+            { name: 'Food', amount: 500, color: '#F94144' },
+            { name: 'Fitness', amount: 120, color: '#F9844A' },
+            { name: 'Insurance', amount: 350, color: '#F9C74F' },
+            { name: 'Beauty', amount: 100, color: '#90BE6D' },
+            { name: 'Vacation', amount: 450, color: '#BECAE6' },
+        ],
+    };
 
     // State to track the current month
     const [currentMonth, setCurrentMonth] = useState('November');

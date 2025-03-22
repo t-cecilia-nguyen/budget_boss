@@ -10,20 +10,22 @@ export default function ContactScreen() {
         <View style={styles.container}>
             <Text style={styles.title}>CONTACT US</Text>
 
-            {/* Divider */}
-            <View style={styles.divider} />
-
+            {/* Contact Information */}
             <View style={styles.section}>
+
+                {/* Phone */}
                 <View style={styles.roundedItem}>
                     <FontAwesome name="phone" size={24} color={Colors.greyBlue} style={styles.icon} />
                     <Text style={styles.roundedText}>(416) 415-2000</Text>
                 </View>
 
+                {/* Email */}
                 <View style={styles.roundedItem}>
                     <FontAwesome name="envelope" size={24} color={Colors.greyBlue} style={styles.icon} />
                     <Text style={styles.roundedText}>contact@budgetboss.ca</Text>
                 </View>
 
+                {/* Address */}
                 <View style={styles.roundedItem}>
                     <FontAwesome name="map-pin" size={24} color={Colors.greyBlue} style={styles.icon} />
                     <Text style={styles.roundedText}>160 Kendal Ave{"\n"} Toronto, ON M5R 1M3</Text>
@@ -33,8 +35,9 @@ export default function ContactScreen() {
              {/* Divider */}
             <View style={styles.divider} />
 
+            {/* Members */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Members</Text>
+                <Text style={styles.sectionTitle}>MEMBERS</Text>
                 {members.map((member, index) => (
                     <View key={index} style={styles.roundedItem}>
                         <FontAwesome name="user" size={24} color={Colors.greyBlue} style={styles.icon} />
@@ -49,8 +52,6 @@ export default function ContactScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         padding: 30,
         backgroundColor: '#F5F5F5',
     },
@@ -66,29 +67,31 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 30,
         fontWeight: 'bold',
         color: Colors.primaryBlue,
-        marginBottom: 10,
+        marginBottom: 20,
         textAlign: 'center',
     },
     roundedItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         backgroundColor: 'white',
         paddingVertical: 10,
         paddingHorizontal: 20,
-        borderRadius: 30,
+        borderRadius: 20,
         borderWidth: 1,
         borderColor: Colors.greyBlue,
         marginBottom: 10,
         width: '100%',
     },
     icon: {
-        marginRight: 10,
+        width: 30,
+        textAlign: 'center',
     },
     roundedText: {
+        flex: 1,
         fontSize: 16,
         color: Colors.darkBlue,
         textAlign: 'center',

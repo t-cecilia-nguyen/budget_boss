@@ -19,34 +19,36 @@ import CreateTransactions from '../screens/CreateTransactions'
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
+// Categories stack
 function CategoriesStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="CategoriesList"
-        component={Categories}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="CreateCategory"
-        component={CreateCategory}
-        options={{
-          headerShown: true,
-          headerTitle: "New Category",
-        }}
-      />
-      <Stack.Screen
-        name="EditCategory"
-        component={EditCategory}
-        options={{
-          headerShown: true,
-          headerTitle: "Edit Category",
-        }}
-      />
-    </Stack.Navigator>
-  );
+    return (
+        <Stack.Navigator>
+        <Stack.Screen
+            name="CategoriesList"
+            component={Categories}
+            options={{ headerShown: false }}
+        />
+        <Stack.Screen
+            name="CreateCategory"
+            component={CreateCategory}
+            options={{
+            headerShown: true,
+            headerTitle: "New Category",
+            }}
+        />
+        <Stack.Screen
+            name="EditCategory"
+            component={EditCategory}
+            options={{
+            headerShown: true,
+            headerTitle: "Edit Category",
+            }}
+        />
+        </Stack.Navigator>
+    );
 }
 
+// Bottom tab navigator
 export default function BottomTabNavigator() {
     const navigation = useNavigation(); // <-- Use useNavigation hook
 
@@ -62,6 +64,8 @@ export default function BottomTabNavigator() {
                     tabBarActiveTintColor: Colors.accentYellow,
                     tabBarInactiveTintColor: Colors.grey,
                 }}>
+
+                {/* Transactions tab */}
                 <Tab.Screen
                     name="Transactions"
                     component={Transactions}
@@ -73,6 +77,8 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
+
+                {/* Overview tab */}
                 <Tab.Screen
                     name="Overview"
                     component={Overview}
@@ -84,6 +90,8 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
+
+                {/* Budgets tab */}
                 <Tab.Screen
                     name="Budgets"
                     component={BudgetsStackNavigator}
@@ -95,6 +103,8 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
+
+                {/* Categories tab */}
                 <Tab.Screen
                     name="Categories"
                     component={CategoriesStack}
@@ -106,6 +116,8 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
+
+                {/* Reports tab */}
                 <Tab.Screen
                     name="Reports"
                     component={Reports}
@@ -118,6 +130,7 @@ export default function BottomTabNavigator() {
                         ),
                     }} />
             </Tab.Navigator>
+
             {/* Add button */}
             <TouchableOpacity
                 style={styles.floatingButton}
@@ -130,16 +143,16 @@ export default function BottomTabNavigator() {
 }
 
 const styles = StyleSheet.create({
-  floatingButton: {
-    position: "absolute",
-    right: 10,
-    bottom: 60,
-    backgroundColor: Colors.accentYellow,
-    width: 50,
-    height: 50,
-    borderRadius: "50%",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 5,
-  },
+    floatingButton: {
+        position: "absolute",
+        right: 10,
+        bottom: 60,
+        backgroundColor: Colors.accentYellow,
+        width: 50,
+        height: 50,
+        borderRadius: "50%",
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 5,
+    },
 });

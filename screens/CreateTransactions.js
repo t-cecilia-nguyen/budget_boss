@@ -31,6 +31,8 @@ const CreateTransactions = () => {
     const fetchUserData = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
+        if (!token) return;
+
         const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
 
         if (token) {
@@ -190,8 +192,6 @@ const CreateTransactions = () => {
           placeholder="Select a category"
           dropDownStyle={styles.dropdown}
           containerStyle={styles.dropdownContainer}
-          itemStyle={[styles.dropdownItem, { fontSize: 30 }]}
-          labelStyle={{ fontSize: 26 }}
           listMode="SCROLLVIEW"  // Enables scroll mode for the dropdown
           scrollViewProps={{
             showsVerticalScrollIndicator: true,  // Adds vertical scroll indicator

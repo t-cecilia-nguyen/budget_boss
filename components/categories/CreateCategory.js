@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,88 +7,131 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import RadioButton from "./RadioButton";
 import IconPicker from "./IconPicker";
+import Constants from "expo-constants";
 
 
-const basePath = "http://10.0.2.2:5000/uploads/";
+const basePath = `${Constants.expoConfig.extra.API_BACKEND_URL}/uploads/`;
 
-const CreateCategory = ({ navigation, route  }) => {
-  // Initialize state for category fields (empty for new category)
+const CreateCategory = ({ navigation, route }) => {
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
-  const [categoryType, setCategoryType] = useState("Expense"); //default is Expense
+  const [categoryType, setCategoryType] = useState("Expense"); // default is Expense
   const [categoryImage, setCategoryImage] = useState("");
+  const [token, setToken] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const { userId, selected } = route.params || {};
+  const { selected } = route.params || {};
 
-  // console.log("userid from create:", userId);
-  // console.log("selectedbutton from create:", selected);
+  /* Get user by received token */
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem("token");
+        if (!storedToken) {
+          console.log("No token could be found.");
+          return;
+        }
+        setToken(storedToken);
+        console.log("Retrieved token in create:", storedToken);
 
-  /////
- // Fetch categories after updating one
- const fetchCategories = async () => {
-  try {
-    const response = await fetch("http://10.0.2.2:5000/categories");
-    const data = await response.json();
-    return data; // Return the updated list of categories
-  } catch (error) {
-    console.error("Error fetching categories:", error);
-    return [];
-  }
-};
+        const userUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
+        const response = await axios.get(userUrl, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        });
 
-/// CREATE NEW CATGORY /////
-
-  const handleCreateCategory = async (newCategory) => {
-    try {
-      const response = await fetch("http://10.0.2.2:5000/categories/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newCategory),
-      });
-  
-      if (response.ok) {
-        console.log("Category created successfully: "+ newCategory.categoryName);
-  
-        // Fetch the updated categories list
-        const updatedList = await fetchCategories();
-        // Navigate back to CategoriesList with the updated list
-        navigation.navigate("CategoriesList", {
-          updatedCategories: updatedList,
-          userId,
-          selected,
-        });      
-      } 
-      else if (response.status == 409){
-        console.error("Failed to create category:", response.status);
-        alert("Failed to create category. Category name already exists");
+        if (response.status === 200) {
+          setUserId(response.data.id);
+        } else {
+          console.error("Failed to fetch user info:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error retrieving user info:", error);
       }
-      else {
-        console.error("Failed to create category:", response.status);
-        alert("Failed to create category. Please try again.");
+    };
+
+    getUserId();
+  }, []);
+
+  /* Get categories list after setting token */
+  const fetchCategories = async () => {
+    const url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories`;
+
+    if (token) {
+      try {
+        const response = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!Array.isArray(response.data)) {
+          console.error("Error: API response is not an array!", response.data);
+          return;
+        }
+
+        const categoriesItems = response.data.map((item) => ({
+          ...item,
+          img_url: `${basePath}${item.img_name}`,
+        }));
+
+        return categoriesItems;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        return [];
       }
-    } catch (error) {
-      console.error("Error creating category:", error);
-      alert("An error occurred while creating the category. Please try again.");
+    } else {
+      console.error("No token found");
     }
   };
-  
 
 
+  /* Function handle create and saving new category */
+  const handleCreateCategory = async (newCategory) => {
+    if (!newCategory.name || newCategory.name.trim() === "") {
+      alert("Category name cannot be empty.");
+      return;
+    }
+    if (token) {
+      try {
+        const response = await axios.post(`${Constants.expoConfig.extra.API_BACKEND_URL}/categories/create`, newCategory, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.status === 201 || response.status === 200 ) {
+          console.log("Category created successfully:", newCategory.categoryName);
+
+          const updatedList = await fetchCategories();
+          navigation.navigate("CategoriesList", {
+            updatedCategories: updatedList,
+            userId,
+            selected,
+          });
+        } else if (response.status === 409) {
+          console.error("Failed to create category:", response.status);
+          alert("Failed to create category. Category name already exists.");
+        } else {
+          console.error("Failed to create category:", response.status);
+          alert("Failed to create category. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error creating category:", error);
+        alert("An error occurred while creating the category. Please try again.");
+      }
+    }
+  };
+
+  /* Function handle saving new data */
   const handleSave = () => {
-    console.log("New category to be created:", {
-      name: categoryName,
-      description: categoryDescription,
-      type: categoryType,
-      img_name: categoryImage && categoryImage !== "" ? categoryImage : "default.png",
-      userId,
-    });
-
-    
     const newCategory = {
       name: categoryName,
       description: categoryDescription,
@@ -96,29 +139,25 @@ const CreateCategory = ({ navigation, route  }) => {
       img_name: categoryImage && categoryImage !== "" ? categoryImage : "default.png",
       user_id: userId,
     };
-      handleCreateCategory(newCategory); 
-    };
-  
 
+    handleCreateCategory(newCategory);
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.rowBox}>
-      <IconPicker
-      categoryImage={categoryImage}
-      basePath={basePath}
-      onImageSelect={(selectedImage) => setCategoryImage(selectedImage)}
-      />
-        
+        <IconPicker
+          categoryImage={categoryImage}
+          basePath={basePath}
+          onImageSelect={(selectedImage) => setCategoryImage(selectedImage)}
+        />
         <View style={styles.infoBox}>
-          {/* category name */}
           <TextInput
             style={styles.input}
             placeholder="Name"
             value={categoryName}
             onChangeText={(text) => setCategoryName(text)}
           />
-          {/* category description */}
           <TextInput
             style={styles.input}
             placeholder="Description"
@@ -127,9 +166,10 @@ const CreateCategory = ({ navigation, route  }) => {
           />
         </View>
       </View>
+
       <RadioButton
         selectedValue={categoryType}
-        onValueChange={(value) => setCategoryType(value)} // Update categoryType
+        onValueChange={(value) => setCategoryType(value)}
         options={[
           { label: "Income", value: "Income" },
           { label: "Expense", value: "Expense" },
@@ -158,7 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20, //  space between the button and input fields
+    marginTop: 20,
   },
   buttonText: {
     color: "#fff",

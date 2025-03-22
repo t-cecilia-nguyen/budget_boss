@@ -9,6 +9,7 @@ export default function SubmitFeedbackScreen() {
     const [liked, setLiked] = useState('');
     const [message, setMessage] = useState('');
 
+    // Rating faces
     const ratingFaces = [
         { label: 'Angry 😠', icon: 'angry' },
         { label: 'Sad 🙁', icon: 'frown' },
@@ -17,16 +18,20 @@ export default function SubmitFeedbackScreen() {
         { label: 'Very Happy 😄', icon: 'grin-beam' },
     ];
 
+    // Select rating
     const ratingSelect = (index) => {
         setSelectedRating(index);
     };
 
+    // Submit feedback
     const submit = async () => {
+        // Check if rating is not selected
         if (selectedRating === null) {
             alert("Please rate your experience before submitting.");
             return;
         }
     
+        // Form data
         const formData = {
             rating: ratingFaces[selectedRating]?.label,
             liked,
@@ -34,6 +39,7 @@ export default function SubmitFeedbackScreen() {
         };
     
         try {
+            // Send POST request to Formspree
             const response = await axios.post("https://formspree.io/f/xvgzqbgz", formData, {
                 headers: {
                     "Content-Type": "application/json",
@@ -41,25 +47,31 @@ export default function SubmitFeedbackScreen() {
             });
     
             if (response.status == 200) {
+                // Success
                 alert("Thank you for your feedback!");
                 setSelectedRating(null);
                 setLiked('');
                 setMessage('');
             } else {
+                // Error
                 alert("Failed to submit feedback. Please try again.");
             }
         } catch (error) {
+            // Error
             console.error("Error submitting feedback:", error);
             alert("An error occurred.");
         }
     };    
 
     return (
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
+            {/* Feedback Title */}
             <Text style={styles.title}>Share your feedback</Text>
 
             <View style={styles.ratingContainer}>
+                {/* Rating Title */}
                 <Text style={styles.ratingTitle}>Rate your experience</Text>
+                {/* Rating Faces */}
                 <View style={styles.faces}>
                     {ratingFaces.map((face, index) => (
                         <TouchableOpacity
@@ -74,6 +86,7 @@ export default function SubmitFeedbackScreen() {
             </View>
 
             <View style={styles.section}>
+                {/* Comment */}
                 <Text style={styles.sectionTitle}>Leave a comment (optional)</Text>
                 <TextInput
                     style={styles.textArea}
@@ -85,10 +98,14 @@ export default function SubmitFeedbackScreen() {
                 />
             </View>
 
+            {/* Empty section for spacing */}
+            <View style={styles.emptySection}></View>
+
+            {/* Submit button */}
             <TouchableOpacity style={styles.button} onPress={submit}>
                 <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
-        </ScrollView>
+        </View>
     );
 }
 
@@ -154,6 +171,9 @@ const styles = StyleSheet.create({
         color: Colors.darkBlue,
         height: 150,
         textAlignVertical: 'top',
+    },
+    emptySection: {
+        flex: 1,
     },
     button: {
         backgroundColor: Colors.primaryBlue,

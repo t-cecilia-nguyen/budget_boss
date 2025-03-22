@@ -9,8 +9,8 @@ SCHEMA = os.path.join(os.path.dirname(__file__), 'schema.sql')
 def init_db():
     try:
         # Debug: Print paths
-        print(f"Database path: {os.path.abspath(DATABASE)}")
-        print(f"Schema path: {os.path.abspath(SCHEMA)}")
+        #print(f"Database path: {os.path.abspath(DATABASE)}")
+        #print(f"Schema path: {os.path.abspath(SCHEMA)}")
 
         # Connect to SQLite
         connection = sqlite3.connect(DATABASE)
@@ -41,12 +41,3 @@ def init_db():
             print("Seed data inserted successfully!")
         else:
             print(f"Seed data file not found: {seed_data_file}")
-
-    except Exception as e:
-        print(f"Error initializing database: {e}")
-
-    finally:
-        connection.close()
-
-if __name__ == "__main__":
-    init_db()

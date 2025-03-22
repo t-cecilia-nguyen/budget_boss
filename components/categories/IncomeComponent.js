@@ -1,71 +1,110 @@
-import { StyleSheet, Text, View, Dimensions, Image, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native-gesture-handler";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import Constants from "expo-constants";
 
 
 const { width: screenWidth } = Dimensions.get("window");
+const basePath = `${Constants.expoConfig.extra.API_BACKEND_URL}/uploads/`;
 
-const basePath = "http://10.0.2.2:5000/uploads/";
+/* This component filters out Income categories list*/
 
-const IncomeComponent = ({userId, selected}) => {
+const IncomeComponent = ({selected,userId, token, updatedCategories}) => {
   const [categories, setCategories] = useState([]);
 
-    const navigation = useNavigation();
-  
-    const handleEditPress = (item) => {
-      navigation.navigate("EditCategory", {data: item, userId, selected});
-    };
+  //console.log("token recieved from parent categories component: ", token)
+  const navigation = useNavigation();
 
 
-useEffect(() => {
-    fetchCategories();
-  }, []);
+  const handleEditPress = (item) => {
+    navigation.navigate("EditCategory", { data: item, userId , selected, token}); 
+  };
 
-  const fetchCategories = () => {
-    fetch("http://10.0.2.2:5000/categories", {
-      method: "GET",
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
+
+  const fetchCategories = async () => {
+    const url = `${Constants.expoConfig.extra.API_BACKEND_URL}/categories`;
+
+    if (token) {
+      try {
+        const response = await axios.get(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        const data = response.data;
+
+        //console.log("Data: ", data)
+        if (!Array.isArray(data)) {
+          console.error("Error: API response is not an array!", data);
+          return;
+        }
         // Use the base path to construct the image URLs
-        const categoriesItems = data
-          .map((item) => ({
+        const categoriesItems = data.map((item) => ({
             ...item,
             img_url: `${basePath}${item.img_name}`,
           }))
           .filter((item) => item.type === "Income");
+
         setCategories(categoriesItems);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+      } catch {
+        (error) => {
+          console.error("Error fetching data:", error);
+        };
+      }
+    } else{
+      console.error("No token..");
+    }
   };
+  useEffect(() => {
+    try {
+      if (updatedCategories) {
+        // Filter updatedCategories to only include 'Income' types
+        const incomeCategories = updatedCategories.filter(
+          (category) => category.type === "Income"
+        );
+        setCategories(incomeCategories); 
+      } else {
+        fetchCategories();
+      }
+    } catch (error) {
+      console.log("Error fetching income categories:", error);
+    }
+  }, [updatedCategories]);
+  
 
   const renderData = (item) => {
-    
     return (
-          <TouchableOpacity onPress={ () => handleEditPress(item)}>
-      
-      <View style={styles.itemCard}>
-        <View style={styles.itemInfo}>
-          <View style={styles.imageBox}>
-            <Image
-              style={{ width: 35, height: 35 }}
-              resizeMode="center"
-              source={{ uri: item.img_url }} 
+      <TouchableOpacity onPress={() => handleEditPress(item)}>
+        <View style={styles.itemCard}>
+          <View style={styles.itemInfo}>
+            <View style={styles.imageBox}>
+              <Image
+                style={{ width: 35, height: 35 }}
+                resizeMode="center"
+                source={{ uri: item.img_url }}
               />
+            </View>
+            <View style={styles.itemText}>
+              <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
+              <Text style={{ color: "grey", fontSize: 12 }}>
+                {item.description}
+              </Text>
+            </View>
           </View>
-          <View style={styles.itemText}>
-            <Text style={{ fontWeight: "bold" }}>{item.name}</Text>
-            <Text style={{ color: "grey", fontSize: 12 }}>
-              {item.description}
-            </Text>
-          </View>
+
+          <FontAwesome6 name="greater-than" size={16} color="lightgrey" />
         </View>
-        <FontAwesome6 name="greater-than" size={16} color="lightgrey" />
-      </View>
       </TouchableOpacity>
     );
   };
@@ -111,7 +150,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   itemInfo: {
-    width: '60%',
+    width: "60%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -120,7 +159,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "center",
-    width: '70%',
+    width: "70%",
   },
   imageBox: {
     height: 30,

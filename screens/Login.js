@@ -16,6 +16,7 @@ export default function LoginScreen({ navigation }) {
         password: '',
     });
 
+    // Validate email and password
     const validateInputs = () => {
         let isValid = true;
         let tempErrors = { email: '', password: '' };
@@ -34,15 +35,17 @@ export default function LoginScreen({ navigation }) {
         
     };
 
+    // Login logic
     const handleLogin = async () => {
         // Validate inputs
         const isValid = validateInputs();
         if (!isValid) return;
 
+        // Backend URL
         const backend_url = `${Constants.expoConfig.extra.API_BACKEND_URL}/auth/login`;
-        console.log('Backend URL:', backend_url);
 
         try {
+            // Send POST login request to backend
             const response = await axios.post(backend_url, {
                 email,
                 password,
@@ -54,13 +57,14 @@ export default function LoginScreen({ navigation }) {
 
                 // Save token to AsyncStorage
                 await AsyncStorage.setItem('token', token);
-                console.log('Token saved:', token);
                 navigation.navigate('DrawerNavigator'); // Navigate to Dashboard
             } else {
+                // Error if login fails
                 Alert.alert("Error", "An error occurred while logging in. Please try again.");
                 console.error('Login failed:', response.statusText);
             }
         } catch (error) {
+            // Errors during login
             console.error('Error during login:', error);
             Alert.alert("Error", "An error occurred while logging in. Please try again.");
         }
@@ -88,7 +92,11 @@ export default function LoginScreen({ navigation }) {
         >
             <View style={styles.overlay}>
                 <View style={styles.card}>
+
+                    {/* Login Form */}
                     <Text style={styles.title}>Login</Text>
+
+                    {/* Email Input */}
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="email" size={24} style={styles.icon} />
                         <TextInput
@@ -102,6 +110,8 @@ export default function LoginScreen({ navigation }) {
                         />
                         <Text style={getErrorTextStyle('email')}>{errors.email}</Text>
                     </View>
+
+                    {/* Password Input */}
                     <View style={styles.inputContainer}>
                         <MaterialIcons name="lock" size={24} style={styles.icon} />
                         <TextInput
@@ -114,10 +124,14 @@ export default function LoginScreen({ navigation }) {
                         />
                         <Text style={getErrorTextStyle('password')}>{errors.password}</Text>
                     </View>
+
+                    {/* Login Button */}
                     <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
                         <Text style={styles.loginButtonText}>LOGIN</Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Sign up link */}
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
                     <Text style={styles.signupText}>Don't have an account? Sign Up here</Text>
                 </TouchableOpacity>
