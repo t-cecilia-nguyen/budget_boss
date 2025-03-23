@@ -35,67 +35,63 @@ const CreateTransactions = () => {
 
         const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
 
-        if (token) {
-          const response = await fetch(backendUrl, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
+        const response = await axios.get(backendUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-          if (response.ok) {
-            const data = await response.json();
-            console.log("User ID: ", data.id);
-            setUserData({ id: data.id });
-          } else {
-            console.error('Failed to fetch user info:', response.statusText);
-            Alert.alert('Error', 'Unable to fetch user data.');
-          }
+        if (response.status === 200) {
+          setUserData(response.data);
+        } else {
+          console.error('Failed to fetch user data:', response.statusText);
+          Alert.alert('Error', 'Unable to fetch user data.');
         }
       } catch (error) {
-        console.error('Error fetching user info:', error);
+        console.error('Error fetching user data:', error);
         Alert.alert('Error', 'An error occurred while fetching user data.');
       }
     };
-
     fetchUserData();
   }, []);
 
-    // loading category into dropdown list
-    useEffect(() => {
-      const fetchCategories = async () => {
-        try {
-          const response = await axios.get(categories_url);
-          if (response.status === 200) {
-            const allCategories = response.data;
-            setAllCategories(allCategories); // Store all categories (Income & Expense)
+  // Fetch all categories (both Income and Expense) and filter based on selected tab
+  useEffect(() => {
+    const fetchCategories = async () => {
+      console.log(`Fetching categories for type: ${selectedTab}`);
 
-            // Filter categories based on selected tab
-            const filteredCategories = allCategories.filter(cat => cat.type === selectedTab);
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) return;
 
-            // Remove duplicates based on name
-            const uniqueCategories = Array.from(new Set(filteredCategories.map(cat => cat.name)))
-              .map(name => filteredCategories.find(cat => cat.name === name));
+        const response = await axios.get(categories_url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-            // Set categories with unique keys
-            setCategories(uniqueCategories.map((cat) => ({
-              label: cat.name,
-              value: cat.name,
-            })));
-          } else {
-            console.error('Failed to fetch categories:', response.statusText);
-            Alert.alert('Error', 'Unable to fetch categories.');
-          }
-        } catch (error) {
-          console.error('Error fetching categories:', error);
-          Alert.alert('Error', 'An error occurred while fetching categories.');
+        if (response.status === 200) {
+          setAllCategories(response.data); // Save all categories (both Income and Expense)
+          // Now filter categories based on the selected tab
+          const filteredCategories = response.data.filter(cat => cat.type === selectedTab);
+          setCategories(filteredCategories.map(cat => ({
+            label: cat.name,
+            value: cat.name,
+          })));
+        } else {
+          console.error('Failed to fetch categories:', response.statusText);
+          Alert.alert('Error', 'Unable to fetch categories.');
         }
-      };
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        Alert.alert('Error', 'An error occurred while fetching categories.');
+      }
+    };
 
-      fetchCategories();
-    }, [selectedTab]); // Runs when selectedTab changes
-
+    fetchCategories();
+  }, [selectedTab]); // Fetch categories whenever the selected tab changes
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -192,6 +188,7 @@ const CreateTransactions = () => {
           placeholder="Select a category"
           dropDownStyle={styles.dropdown}
           containerStyle={styles.dropdownContainer}
+          itemStyle={styles.dropdownItem}
           listMode="SCROLLVIEW"  // Enables scroll mode for the dropdown
           scrollViewProps={{
             showsVerticalScrollIndicator: true,  // Adds vertical scroll indicator
@@ -365,7 +362,6 @@ const styles = StyleSheet.create({
   },
   dropdownItem: {
     justifyContent: 'center',
-    fontSize: 30,
   },
   placeholder: {
     fontSize: 30,
