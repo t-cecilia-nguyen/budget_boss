@@ -4,6 +4,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { format } from "date-fns";
 
 const BudgetScreen = ({ navigation }) => {
 
@@ -11,6 +12,7 @@ const BudgetScreen = ({ navigation }) => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [amount, setAmount] = useState('');
+    const [amountSpent, setAmountSpent] = useState('');
     const [category, setCategory] = useState('');
     const [notes, setNotes] = useState('');
     const [token, setToken] = useState('');
@@ -40,7 +42,6 @@ const BudgetScreen = ({ navigation }) => {
     }, []);
 
     // Get category names 
-    // Will eventually update this to only pull category names labeled as an expense rather than ALL
     useEffect(() => {
         const getCategories = async () => {
 
@@ -93,7 +94,12 @@ const BudgetScreen = ({ navigation }) => {
             return false;
         }
 
-        
+         // If amount_spent is not a number
+         if (isNaN(amountSpent)) {
+            Alert.alert('Validation Error', 'Please enter a valid number.');
+            return false;
+        }
+
         return true;
     };
 
@@ -105,9 +111,10 @@ const BudgetScreen = ({ navigation }) => {
         try {
             
             const budgetData = {
-                startDate: startDate.toISOString().split('T')[0],
-                endDate: endDate.toISOString().split('T')[0],
+                startDate: format(startDate, 'yyyy-MM-dd'),
+                endDate: format(endDate, 'yyyy-MM-dd'),
                 amount: parseFloat(amount),
+                amount_spent: amountSpent ? parseFloat(amountSpent) : 0,
                 category,
                 notes,
             };
@@ -137,11 +144,12 @@ const BudgetScreen = ({ navigation }) => {
         <View style={styles.container}>
             <Text style={styles.title}>Create a Budget</Text>
 
+            {/* Start date field */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Start Date:</Text>
                     <TouchableOpacity onPress={() => setStartDatePicker(true)} style={styles.inputButton}>
                         <Text style={styles.inputText}>
-                            {startDate ? startDate.toISOString().split('T')[0] : 'Select Start Date'}
+                            {startDate ? format(startDate, 'yyyy-MM-dd') : 'Select Start Date'}
                         </Text>
                     </TouchableOpacity>
                     {startDatePicker && (
@@ -156,12 +164,13 @@ const BudgetScreen = ({ navigation }) => {
                         />
                     )}  
             </View>
-
+            
+            {/* End date field */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>End Date:</Text>
                 <TouchableOpacity onPress={() => setEndDatePicker(true)} style={styles.inputButton}>
                     <Text style={styles.inputText}>
-                        {endDate ? endDate.toISOString().split('T')[0] : 'Select End Date'}
+                        {endDate ? format(endDate, 'yyyy-MM-dd') : 'Select End Date'}
                     </Text>
                 </TouchableOpacity>
                 {endDatePicker && (
@@ -177,6 +186,7 @@ const BudgetScreen = ({ navigation }) => {
                 )}         
             </View>
             
+            {/* Amount field */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Amount:</Text>
                 <TextInput
@@ -187,7 +197,20 @@ const BudgetScreen = ({ navigation }) => {
                     onChangeText={setAmount}
                 />
             </View>
-
+            
+            {/* Amount spent field */}
+            <View style={styles.formGroup}>
+                <Text style={styles.label}>Amount Spent:</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Enter Amount Spent"
+                    keyboardType="numeric"
+                    value={amountSpent}
+                    onChangeText={setAmountSpent}
+                />
+            </View>
+            
+            {/* Category field */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Category:</Text>
                 <View style={styles.pickerWrapper}>
@@ -199,7 +222,8 @@ const BudgetScreen = ({ navigation }) => {
                     </Picker>
                 </View>
             </View>
-
+            
+            {/* Notes field */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>Notes:</Text>
                 <TextInput
@@ -209,6 +233,8 @@ const BudgetScreen = ({ navigation }) => {
                     onChangeText={setNotes}
                 />
             </View>
+
+            {/* Submit and navigation buttons */}
             <View style={styles.buttonGroup}>
                 <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Submit Budget</Text>

@@ -22,6 +22,15 @@ def validate_amount(amount_str):
         return amount
     except ValueError:
         return None
+    
+# Validates amount_spent and caps negative values
+def validate_amount_spent(amount_spent_str):
+    try: 
+        amount_spent = float(amount_spent_str)
+        # if user enters negative number, cap entry to 0
+        return 0 if amount_spent < 0 else amount_spent
+    except ValueError:
+        return None
 
 # Create a new budget
 @budgets_bp.route('/create', methods=['POST'])
@@ -55,6 +64,7 @@ def create_budget():
         start_date = data.get('startDate')
         end_date = data.get('endDate')
         amount = data.get('amount')
+        amount_spent = data.get('amount_spent', 0)
         category = data.get('category')
         notes = data.get('notes')
         
@@ -74,7 +84,14 @@ def create_budget():
 
         if amount is None:
             return jsonify({"error": "Amount must be a valid number greater than zero."}), 400
+        
+        # Validation check for amount_spent 
+        amount_spent = validate_amount_spent(amount_spent)
 
+        if amount_spent is None:
+            return jsonify({"error": "Amount spent must be a valid number."}), 400
+
+        # Connect to DB
         db = get_db()
         
         # Debug Insertion check
@@ -82,9 +99,9 @@ def create_budget():
         
         # Insert new budget entry into the db
         db.execute('''
-            INSERT INTO budgets (user_id, start_date, end_date, amount, category, notes)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (user_id, start_date, end_date, amount, category, notes))
+            INSERT INTO budgets (user_id, start_date, end_date, amount, amount_spent, category, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (user_id, start_date, end_date, amount, amount_spent, category, notes))
         db.commit()
 
         return jsonify({"message": "Budget created successfully."}), 201
@@ -132,21 +149,102 @@ def list_budgets():
         
         db = get_db()
 
-        # Query that groups all budgets based on category for that month/year
+        # Query that groups all budgets for that month/year
         budgets = db.execute('''
-            SELECT category, SUM(amount) AS category_budget
+            SELECT id, amount, amount_spent, start_date, end_date, category
             FROM budgets
             WHERE user_id = ? 
             AND strftime('%Y', start_date) = ?
             AND strftime('%m', start_date) = ?
-            GROUP BY category
         ''', (user_id, year, month)).fetchall()
+
+        # Group budgets by category
+        # Dictionary to hold grouped category data
+        grouped = {}
+
+        # Iterates over each budget entry from query
+        for budget in budgets:
+
+            # Get category of current budget
+            category = budget['category']
+
+            # Initialize category if it hasn't been iterated over yet
+            if category not in grouped:
+                grouped[category] = {
+                    'category': category,
+                    'category_budget': 0,
+                    'category_spent': 0,
+                    'entries': []
+                }
+            
+            # Add current budget's amount to category budget total
+            grouped[category]['category_budget'] += budget['amount']
+
+            # Add current budget's amount spent to category spent total
+            grouped[category]['category_spent'] += budget['amount_spent']
+
+            # Add current budget's entry details to list of entries in the category
+            grouped[category]['entries'].append({
+                'id': budget['id'],
+                'amount': budget['amount'],
+                'amount_spent': budget['amount_spent'],
+                'start_date': budget['start_date'],
+                'end_date': budget['end_date']
+            })
 
         # Debug query result check
         print(f"Query result: {budgets}")
 
-        return jsonify([dict(budget) for budget in budgets]), 200
+        return jsonify(list(grouped.values())), 200
     
+    except Exception as err:
+        print(f"Error: {err}")
+        return jsonify({"error": str(err)}), 500
+
+# Delete specific budget entry based off budget_id
+@budgets_bp.route('/delete/<int:budget_id>', methods=['DELETE'])
+def delete_budget(budget_id):
+
+    try: 
+
+        # Authorization header extraction from request
+        auth_header = request.headers.get('Authorization')
+
+        # If missing token
+        if not auth_header:
+            return jsonify({"error": "Missing Authorization token."}), 403
+        
+        # Extract token from auth header
+        token = auth_header.split(" ")[1]
+
+        try:
+            # Use secret key to decode token and retrieve user id
+            decoded_token = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=['HS256'])
+            user_id = decoded_token['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token has expired."}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token."}), 401
+        
+        db = get_db()
+
+        # Get specified budget based off its id 
+        budget = db.execute('''
+            SELECT * FROM budgets WHERE id = ? AND user_id = ? 
+        ''', (budget_id, user_id)).fetchone()
+
+        # if budget with that id could not be found
+        if not budget:
+            return jsonify({"error": f"Budget with ID {budget_id} could not be found."}), 404
+        
+        # Delete budget entry if found
+        db.execute('DELETE FROM budgets WHERE id = ? AND user_id = ?', (budget_id, user_id))
+        db.commit()
+
+        # Success message
+        return jsonify({"message": "Budget deleted successfully."}), 200
+     
+    # Exception catch 
     except Exception as err:
         print(f"Error: {err}")
         return jsonify({"error": str(err)}), 500

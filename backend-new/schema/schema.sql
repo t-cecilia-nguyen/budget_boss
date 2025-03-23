@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS budgets (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     amount REAL NOT NULL,
+    amount_spent REAL DEFAULT 0,
     category TEXT NOT NULL,
     notes TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE

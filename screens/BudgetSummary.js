@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { format } from "date-fns";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Progress from 'react-native-progress';
 
 const BudgetSummaryScreen = ({ navigation }) => {
 
@@ -11,6 +12,7 @@ const BudgetSummaryScreen = ({ navigation }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [budgets, setBudgets] = useState([]);
     const [token, setToken] = useState('');
+    const [expandedCategories, setExpandedCategories] = useState({});
     
     //Retrieve user token
     useEffect(() => {
@@ -78,6 +80,14 @@ const BudgetSummaryScreen = ({ navigation }) => {
         }
     };
 
+    // Toggle for expanding category to showcase individual budgets
+    const toggleCategory = (category) => {
+        setExpandedCategories((prev) => ({
+            ...prev,
+            [category]: !prev[category],
+        }));
+    };
+
     // Changes the displayed month by 1
     const changeMonth = (direction) => {
         setCurrentDate((prevDate) => {
@@ -97,14 +107,52 @@ const BudgetSummaryScreen = ({ navigation }) => {
     }
 
     // Calculates total spent based off all categories for the month
-    // Dummy data - Sets spent to 100 for each category in the month to simulate overall look
-    // Will update in future to be editable - Jan 31st, 2025
     const calculateTotalSpent = () => {
-        return budgets.reduce((total, item) => total + 100, 0);
+        return budgets.reduce((total, item) => total + (item.category_spent || 0), 0);
     }
+
+    // Delete a specific budget based off its ID
+    const deleteBudget = (budgetId) => {
+        // Alert to confirm deletion
+        Alert.alert(
+            "Confirm Delete",
+            "Are you sure you want to delete this budget entry?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete", style: "destructive",
+                    onPress: async () => {
+                        try {
+                            // Axios delete request to backend
+                            const response = await axios.delete(`http://10.0.2.2:5000/budgets/delete/${budgetId}`, {
+                                headers: {
+                                    Authorization: `Bearer ${token}`
+                                }
+                            });
+
+                            // If deletion is successful
+                            if (response.status === 200) {
+                                Alert.alert("Success", response.data.message);
+                                // Refresh budgets after success
+                                getBudgets();
+                            } else {
+                                // Alert for failed deletion
+                                Alert.alert("Error", response.data.error || "Failed to delete budget entry.")
+                            }
+                        } catch (error) {
+                            // Catch for exceptions
+                            console.error('Error deleting budget entry:', error)
+                            Alert.alert("Error", "An error has occured while deleting the budget.")
+                        }
+                    }
+                }
+            ]
+        );
+    };
 
     return (
         <View style={styles.container}>
+            {/* Nav Header for month / year selection */}
             <View style={styles.headerContainer}>
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => changeMonth(-1)}>
@@ -117,31 +165,98 @@ const BudgetSummaryScreen = ({ navigation }) => {
                         <Text style={styles.navButton}>&gt;</Text>
                     </TouchableOpacity>
                 </View>
-
+                {/* Displays total budget and total spent for the selected month */}
                 <View style={styles.calculateContainer}>
                     <Text style={styles.totalBudgetText}>Total Budget: ${calculateTotalBudget().toFixed(2)}</Text>
                     <Text style={styles.totalSpentText}>Total Spent: ${calculateTotalSpent().toFixed(2)}</Text>
                 </View>
             </View>
 
+            {/* Budget list section */}
             <View style={styles.listContainer}>
                 <FlatList
                     data={budgets}
                     keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.listItem}>
-                            <Text style={styles.itemCategory}>{item.category}</Text>
-                            <Text style={styles.itemAmount}>Budget: ${item.category_budget.toFixed(2)}</Text>
-                            
-                            <View style={styles.remainingCategoryItems}>
-                                <Text style={styles.itemSpent}>Spent: $</Text>
-                                <Text style={styles.itemRemaining}>Remaining: $</Text>
-                            </View>
-                        </View>
-                    )}
-                    ListEmptyComponent={<Text style={styles.emptyList}>No budget data is available for this month.</Text>}
-                />
+                    renderItem={({ item }) => {
+                        // Check if category has been expanded 
+                        const isExpanded = expandedCategories[item.category] || false;
+                        
+                        // Set category remaining calculation
+                        const remaining = item.category_budget - (item.category_spent || 0);
+                        
+                        // Set remaining text's colour based off if the user is over budget 
+                        const remainingColour = remaining > 0 ? styles.remainingText : styles.overBudgetText;
 
+                        // Calculate progress bar gauge's fill percentage 
+                        const usageRatio = (item.category_spent || 0) / item.category_budget;
+                        let progressColour = '#4CAF50';
+                        
+                        // Usage ratio check (0 to 0.74 - green, 0.75 to 0.99 - orange, red 100+)
+                        if (usageRatio > 0.99) progressColour = '#F94144';
+                        else if (usageRatio > 0.75) progressColour = '#FFA500';
+
+                        return (
+                            <View style={styles.listItem}>
+                                {/* Category Section */}
+                                <TouchableOpacity onPress={() => toggleCategory(item.category)} activeOpacity={0.7}>
+                                    {/* Displays category name and chevron icon based on if the category has been expanded */}
+                                    <View style={styles.categoryHeader}>
+                                        <Text style={styles.itemCategory}>{item.category}</Text>
+                                        <Text style={styles.chevron}>{isExpanded ? '\u25BC' : '\u25B6'}</Text>
+                                    </View>
+
+                                    {/* Category budget */}
+                                    <Text style={styles.itemAmount}>Budget: ${item.category_budget.toFixed(2) || '0.00'}</Text>
+
+                                    {/* Category spent and category remaining */}
+                                    <View style={styles.remainingCategoryItems}>
+                                        <Text style={styles.itemSpent}>Spent: ${item.category_spent?.toFixed(2)}</Text>
+                                        <Text style={[styles.itemRemaining, remainingColour]}>Remaining: ${remaining.toFixed(2)}</Text>
+                                    </View>
+
+                                    {/* Category progress bar */}
+                                    <View style={styles.progressBar}>
+                                        <Progress.Bar
+                                            progress={Math.min(usageRatio, 1)}
+                                            width={null}
+                                            height={10}
+                                            color={progressColour}
+                                            unfilledColor="#e0e0e0"
+                                            borderWidth={0}
+                                        />
+                                    </View>
+                                </TouchableOpacity>
+
+                                {/* Expanded category list displaying individual budgets */}
+                                {isExpanded && item.entries && (
+                                    <View style={styles.expandedList}>
+                                        {item.entries.map((entry, index) => (
+                                            // Displays budget amount, budget spent, and the date range
+                                            <View key={index} style={styles.budgetEntry}>
+                                                <Text style={styles.entryText}>Budget: ${entry.amount} | Spent: ${entry.amount_spent} | Dates: {format(new Date(entry.start_date), 'MM-dd')} to {format(new Date(entry.end_date), 'MM-dd')}</Text>
+                                                
+                                                {/* Budget entry buttons for update and delete */}
+                                                <View style={styles.entryButtonGroup}>
+                                                    <TouchableOpacity style={styles.updateButton}>
+                                                        <Text style={styles.buttonText}>Update</Text>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBudget(entry.id)}>
+                                                        <Text style={styles.buttonText}>Delete</Text>
+                                                    </TouchableOpacity>
+                                                </View>
+                                            </View>
+                                        ))}
+                                    </View>
+                                )}
+                            </View>
+                        );
+                    }}
+                    // If no budgets for the month are available
+                    ListEmptyComponent={
+                        <Text style={styles.emptyList}>No budget data is available for this month.</Text>
+                    }
+                />
+                {/* Back to budget form button */}
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                     <Text style={styles.backButtonText}>Back to Budgets Form</Text>
                 </TouchableOpacity>
@@ -153,7 +268,6 @@ const BudgetSummaryScreen = ({ navigation }) => {
 // Styling
 
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
         backgroundColor: 'white',
@@ -229,6 +343,7 @@ const styles = StyleSheet.create({
     itemCategory: {
         fontSize: 18,
         color: 'black',
+        flex: 1,
     }, 
 
     itemAmount: {
@@ -270,6 +385,76 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: 18,
         fontWeight: 'bold',
+    },
+
+    expandedList: {
+        marginTop: 10,
+        paddingLeft: 10,
+    },
+
+    budgetEntry: {
+        backgroundColor: '#f0f0f0',
+        padding: 10,
+        borderRadius: 5,
+        marginBottom: 10,
+    },
+
+    entryText: {
+        fontSize: 14,
+        marginBottom: 6,
+        color: '#333',
+    },
+
+    entryButtonGroup: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 10,
+    },
+
+    updateButton: {
+        backgroundColor: '#66B2FF', 
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 4,
+        marginLeft: 8,
+    },
+
+    deleteButton: {
+        backgroundColor: '#F94144', 
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 4,
+        marginLeft: 8,
+    },
+
+    buttonText: {
+        color: '#f0f0f0',
+        fontWeight: 'bold',
+        fontSize: 12,
+    },
+
+    categoryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 4,
+    },
+
+    chevron: {
+        fontSize: 25,
+        color: '#666',
+    },
+
+    remainingText: {
+        color: 'black',
+    },
+
+    overBudgetText: {
+        color: '#F94144',
+    },
+
+    progressBar: {
+        marginTop: 6,
     },
 });
 
