@@ -237,7 +237,13 @@ const BudgetSummaryScreen = ({ navigation }) => {
                                                 
                                                 {/* Budget entry buttons for update and delete */}
                                                 <View style={styles.entryButtonGroup}>
-                                                    <TouchableOpacity style={styles.updateButton}>
+                                                    <TouchableOpacity 
+                                                        style={styles.updateButton} 
+                                                        onPress={() => navigation.navigate('UpdateBudget', {
+                                                            // Pre-populate fields with initial budget data
+                                                            budget: { ...entry, category: item.category }
+                                                        })}
+                                                    >
                                                         <Text style={styles.buttonText}>Update</Text>
                                                     </TouchableOpacity>
                                                     <TouchableOpacity style={styles.deleteButton} onPress={() => deleteBudget(entry.id)}>
@@ -257,7 +263,7 @@ const BudgetSummaryScreen = ({ navigation }) => {
                     }
                 />
                 {/* Back to budget form button */}
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('BudgetScreen')}>
                     <Text style={styles.backButtonText}>Back to Budgets Form</Text>
                 </TouchableOpacity>
             </View>
