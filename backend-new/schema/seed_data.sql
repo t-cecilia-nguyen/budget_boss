@@ -57,3 +57,15 @@ VALUES
     (1, 150.0, 'Dining Out', 'expense', '2025-04-15', 'Lunch with friends', 'food.png'),
     (1, 100.0, 'Freelance Work', 'income', '2025-04-20', 'Payment for freelance project', 'freelance.png'),
     (1, 50.0, 'Entertainment', 'expense', '2025-04-25', 'Movie night with family', 'entertainment.png');
+
+-- Seed data for April Budgets 
+INSERT INTO budgets (user_id, start_date, end_date, amount, amount_spent, category, notes)
+VALUES
+    (1, '2025-04-01', '2025-04-06', 125.00, 125.00, 'Groceries', 'Weekly Grocery Bill'),
+    (1, '2025-04-07', '2025-04-13', 150.00, 150.00, 'Groceries', 'Weekly Grocery Bill'),
+    (1, '2025-04-14', '2025-04-20', 150.00, 110.00, 'Groceries', 'Weekly Grocery Bill'),
+    (1, '2025-04-21', '2025-04-27', 150.00, 0.00, 'Groceries', 'Weekly Grocery Bill'),
+    (1, '2025-04-01', '2025-04-30', 175.00, 45.00, 'Internet', 'Internet Monthly Bill'),
+    (1, '2025-04-01', '2025-04-30', 150.00, 250.00, 'Food', 'Monthly Restaurant Budget'),
+    (1, '2025-04-10', '2025-04-10', 75.00, 75.00, 'Gifts', 'Birthday Gift'),
+    (1, '2025-04-25', '2025-04-25', 345.00, 300.00, 'Gifts', 'Anniversary Present');

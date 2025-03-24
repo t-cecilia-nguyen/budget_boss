@@ -6,15 +6,18 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from "date-fns";
 
-const BudgetScreen = ({ navigation }) => {
+const UpdateBudgetScreen = ({ route, navigation }) => {
 
-    // States
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [amount, setAmount] = useState('');
-    const [amountSpent, setAmountSpent] = useState('');
-    const [category, setCategory] = useState('');
-    const [notes, setNotes] = useState('');
+    // Pass budget's original values from summary page
+    const { budget } = route.params;
+    
+    // States - Initialized with original budget's values
+    const [startDate, setStartDate] = useState(new Date(budget.start_date));
+    const [endDate, setEndDate] = useState(new Date(budget.end_date));
+    const [amount, setAmount] = useState(budget.amount.toString());
+    const [amountSpent, setAmountSpent] = useState(budget.amount_spent.toString());
+    const [category, setCategory] = useState(budget.category);
+    const [notes, setNotes] = useState(budget.notes || '');
     const [token, setToken] = useState('');
     const [startDatePicker, setStartDatePicker] = useState('');
     const [endDatePicker, setEndDatePicker] = useState('');
@@ -59,6 +62,12 @@ const BudgetScreen = ({ navigation }) => {
 
                 if (response.status === 200) {
                     const categoryNames = response.data.map(cat => cat.name);
+
+                    // Check to ensure that the original category still exists, defaults to label if not present
+                    if (budget?.category && !categoryNames.includes(budget.category)) {
+                        categoryNames.unshift(budget.category);
+                    }
+
                     setCategories(categoryNames);
                 } else {
                     Alert.alert('Error', 'Failed to fetch categories for form.');
@@ -110,13 +119,13 @@ const BudgetScreen = ({ navigation }) => {
     };
 
     // Form submission
-    const handleSubmit = async () => {
+    const handleUpdate = async () => {
         
         if (!validateForm()) return;
 
         try {
             
-            const budgetData = {
+            const updatedData = {
                 startDate: format(startDate, 'yyyy-MM-dd'),
                 endDate: format(endDate, 'yyyy-MM-dd'),
                 amount: parseFloat(amount),
@@ -125,30 +134,33 @@ const BudgetScreen = ({ navigation }) => {
                 notes,
             };
 
-            const response = await axios.post('http://10.0.2.2:5000/budgets/create', budgetData, {
+            // Payload check
+            //console.log("Updating with:", updatedData)
+
+            const response = await axios.put(`http://10.0.2.2:5000/budgets/update/${budget.id}`, updatedData, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
             });
 
-            if (response.status === 201) {
+            if (response.status === 200) {
                 Alert.alert('Success', response.data.message)
 
                 // Navigates to budget summary after success
                 navigation.navigate('BudgetSummary');
             } else {
-                Alert.alert('Error', response.data.error || 'An error has occured.'); 
+                Alert.alert('Error', response.data.error || 'Failed to update budget.'); 
             }
         } catch (error) {
             console.error('Error:', error)
-            Alert.alert('Error', 'An error occured while submitting the form.');
+            Alert.alert('Error', 'An error occured while updating the form.');
         }
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Create a Budget</Text>
+            <Text style={styles.title}>Update your Budget</Text>
 
             {/* Start date field */}
             <View style={styles.formGroup}>
@@ -242,8 +254,8 @@ const BudgetScreen = ({ navigation }) => {
 
             {/* Submit and navigation buttons */}
             <View style={styles.buttonGroup}>
-                <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-                    <Text style={styles.buttonText}>Submit Budget</Text>
+                <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+                    <Text style={styles.buttonText}>Update Budget</Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('BudgetSummary')}>
@@ -353,4 +365,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default BudgetScreen;
+export default UpdateBudgetScreen;
