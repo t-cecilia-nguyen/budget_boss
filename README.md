@@ -106,3 +106,34 @@ Visual graphs and data insights further enhance users' understanding of their fi
             ```
             npm start
             ```
+
+## :key: Logging In
+
+To log in to the app, use the credentials for the test user created during the database seeding process. The default test user can be found in the `seed_user_data.py` file, located in the `backend-new/schema` directory.
+
+### Default Test User Credentials
+
+- Email: `test-user@email.com`
+- Password: `Password123` (This password is hashed in the database)
+
+You can use these credentials to log in during development. If you need to modify or update the test user data, please follow these steps:
+
+- Open the `seed_user_data.py` file.
+- The relevant code snippet for the test user data is as follows:
+    ```
+    # Seed the user data
+    def seed_data(connection):
+    try:
+        # Test user data
+        first_name = 'Test'
+        last_name = 'User'
+        email = 'test-user@email.com'
+        password = 'Password123'
+    ```
+    In this block, you can modify the `first_name`, `last_name`, `email`, and `password` fields.
+
+After making changes, the updated user data will be inserted into the database when the `seed_data()` function runs. Be sure to delete the `database.db` file if it already exists to start fresh and ensure a clean setup.
+
+### Seed Data for Transactions and Budgets
+
+The `seed_data.sql` file contains predefined transactions and budget entries designed for testing different financial scenarios, including low balance, surplus, and negative budget conditions. It also includes various income and expense categories, along with sample transactions spanning multiple months.
