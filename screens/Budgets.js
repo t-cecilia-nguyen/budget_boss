@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format } from "date-fns";
+import { Colors } from '../assets/colors';
 
 const BudgetScreen = ({ navigation }) => {
 
@@ -101,7 +102,7 @@ const BudgetScreen = ({ navigation }) => {
         }
 
          // If amount_spent is not a number
-         if (isNaN(amountSpent)) {
+        if (isNaN(amountSpent)) {
             Alert.alert('Validation Error', 'Please enter a valid number.');
             return false;
         }
@@ -265,10 +266,11 @@ const styles = StyleSheet.create({
     },
     
     title: {
-        fontSize: 24,
+        fontSize: 30,
         fontWeight: 'bold',
-        textAlign: 'center',
         marginBottom: 20,
+        color: Colors.primaryBlue,
+        alignSelf: 'center',
     },
 
     formGroup: {

@@ -136,7 +136,7 @@ export default function BottomTabNavigator() {
                 style={styles.floatingButton}
                 onPress={() => navigation.navigate('Create Transactions')} // Navigate to Create Transactions tab
             >
-                <MaterialIcons name="add" size={30} color={Colors.white} />
+                <MaterialIcons name="add" size={25} color={Colors.white} />
             </TouchableOpacity>
         </View>
     );
@@ -148,11 +148,11 @@ const styles = StyleSheet.create({
         right: 10,
         bottom: 60,
         backgroundColor: Colors.accentYellow,
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         borderRadius: "50%",
         justifyContent: "center",
         alignItems: "center",
-        elevation: 5,
+        elevation: 3,
     },
 });
