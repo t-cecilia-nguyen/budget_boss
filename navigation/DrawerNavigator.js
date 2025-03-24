@@ -26,11 +26,8 @@ const SignOut = ({ navigation }) => {
     try {
       // Clear token from storage
       await AsyncStorage.removeItem("token");
-
-      // Sign Out confirmation
-      Alert.alert("Sign Out", "You have successfully signed out!", [
-        { text: "OK", onPress: () => navigation.replace("Login") },
-      ]);
+      // Sign Out and navigate to Login screen
+      navigation.replace("Login")
     } catch (error) {
       console.error("Error during sign out:", error);
       Alert.alert("Sign Out", "An error occurred while signing out.");
@@ -92,7 +89,7 @@ function CustomDrawerContent(props) {
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <Image
-          source={require("../assets/yellow-logo.png")} // Profile picture
+          source={require("../assets/yellow-logo.png")} // Budget Boss Logo
           style={styles.profileImage}
         />
         <Text style={styles.profileName}>{user.name}</Text>

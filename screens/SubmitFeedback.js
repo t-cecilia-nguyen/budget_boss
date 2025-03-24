@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 
 import { Colors } from '../assets/colors';
 import { FontAwesome6 } from '@expo/vector-icons';
 import axios from 'axios';
+import Toast from "react-native-toast-message";
 
 export default function SubmitFeedbackScreen() {
     const [selectedRating, setSelectedRating] = useState(null);
@@ -27,7 +28,14 @@ export default function SubmitFeedbackScreen() {
     const submit = async () => {
         // Check if rating is not selected
         if (selectedRating === null) {
-            alert("Please rate your experience before submitting.");
+            Toast.show({
+                text1: "Feedback Error",
+                text2: "Please rate your experience before submitting.",
+                position: 'top',
+                topOffset: 8,
+                type: 'error',
+                visibilityTime: 4000,
+            });
             return;
         }
     
@@ -48,7 +56,14 @@ export default function SubmitFeedbackScreen() {
     
             if (response.status == 200) {
                 // Success
-                alert("Thank you for your feedback!");
+                Toast.show({
+                    text1: "Feedback received!",
+                    text2: "Thank you for helping us improve.",
+                    position: 'top',
+                    topOffset: 8,
+                    type: 'success',
+                    visibilityTime: 4000,
+                });
                 setSelectedRating(null);
                 setLiked('');
                 setMessage('');
@@ -105,6 +120,8 @@ export default function SubmitFeedbackScreen() {
             <TouchableOpacity style={styles.button} onPress={submit}>
                 <Text style={styles.buttonText}>Submit</Text>
             </TouchableOpacity>
+
+            <Toast/>
         </View>
     );
 }
