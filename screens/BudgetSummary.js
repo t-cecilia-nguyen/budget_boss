@@ -333,7 +333,7 @@ const BudgetSummaryScreen = ({ navigation }) => {
                 />
                 {/* Back to budget form button */}
                 <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('BudgetScreen')}>
-                    <Text style={styles.backButtonText}>Create a Budget</Text>
+                    <Text style={styles.backButtonText}>CREATE A BUDGET</Text>
                 </TouchableOpacity>
             </View>
         </View>
