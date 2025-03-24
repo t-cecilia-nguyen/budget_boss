@@ -71,7 +71,7 @@ const CreateTransactions = () => {
             'Content-Type': 'application/json',
           },
         });
-        
+
         if (response.status === 200) {
           setAllCategories(response.data); // Save all categories (both Income and Expense)
           // Now filter categories based on the selected tab

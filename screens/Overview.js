@@ -1,110 +1,186 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import Constants from 'expo-constants';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Colors } from '../assets/colors';
 import { PieChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
 
 const OverviewScreen = () => {
-    // Define data for different months
-    const monthlyData = {
-        October: [
-            { name: 'Rent', amount: 1800, color: '#277DA1' },
-            { name: 'Food', amount: 800, color: '#F94144' },
-            { name: 'Fitness', amount: 100, color: '#F9844A' },
-            { name: 'Shopping', amount: 30, color: '#F9C74F' },
-            { name: 'Medical', amount: 200, color: '#90BE6D' },
-        ],
-        November: [
-            { name: 'Rent', amount: 1800, color: '#277DA1' },
-            { name: 'Food', amount: 400, color: '#F94144' },
-            { name: 'Fitness', amount: 100, color: '#F9844A' },
-            { name: 'Shopping', amount: 80, color: '#F9C74F' },
-        ],
-        December: [
-            { name: 'Rent', amount: 1800, color: '#277DA1' },
-            { name: 'Food', amount: 500, color: '#F94144' },
-            { name: 'Fitness', amount: 120, color: '#F9844A' },
-            { name: 'Insurance', amount: 350, color: '#F9C74F' },
-            { name: 'Beauty', amount: 100, color: '#90BE6D' },
-            { name: 'Vacation', amount: 450, color: '#BECAE6' },
-        ],
-    };
+    const [transactions, setTransactions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedType, setSelectedType] = useState('expense');
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
-    // State to track the current month
-    const [currentMonth, setCurrentMonth] = useState('November');
+    const backendUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/transactions/transactions`;
 
-    // Get the data for the current month
-    const data = monthlyData[currentMonth];
+    useEffect(() => {
+        fetchTransactions();
+    }, [selectedMonth, selectedYear, selectedType]);
 
-    // Calculate total expenses for the current month
-    const totalExpenses = data.reduce((sum, item) => sum + item.amount, 0);
+    const fetchTransactions = async () => {
+        setLoading(true);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const userProfileUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
+            const userResponse = await axios.get(userProfileUrl, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
 
-    // Function to handle the previous month
-    const handlePreviousMonth = () => {
-        const months = Object.keys(monthlyData);
-        const currentIndex = months.indexOf(currentMonth);
-        if (currentIndex > 0) {
-            const prevMonth = months[currentIndex - 1];
-            setCurrentMonth(prevMonth);
+            const userId = userResponse.data.id;
+
+            const response = await axios.post(backendUrl, {
+                user_id: userId,
+                month: selectedMonth.toString().padStart(2, '0'),
+                year: selectedYear.toString(),
+                type: selectedType,
+            });
+
+            setTransactions(response.data.length ? response.data : []);
+        } catch (error) {
+            console.error("Error fetching transactions: ", error);
+            setTransactions([]);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Function to handle the next month
-    const handleNextMonth = () => {
-        const months = Object.keys(monthlyData);
-        const currentIndex = months.indexOf(currentMonth);
-        if (currentIndex < months.length - 1) {
-            const nextMonth = months[currentIndex + 1];
-            setCurrentMonth(nextMonth);
-        }
-    };
+    const filteredTransactions = transactions.filter(transaction => transaction.type === selectedType);
 
+    const groupedTransactions = filteredTransactions.reduce((groups, { category, amount }) => {
+        if (!groups[category]) {
+            groups[category] = [];
+        }
+        groups[category].push({ amount });
+        return groups;
+    }, {});
+
+    const pieChartColors = ['#F94144', '#F9844A', '#F9C74F', '#90BE6D', '#577590', '#277DA1', '#023047', '#8ECAE6'];
+
+    const pieChartData = Object.keys(groupedTransactions)
+        .map((category, index) => {
+            const totalAmount = groupedTransactions[category].reduce((acc, { amount }) => acc + amount, 0);
+            return {
+                name: category,
+                population: totalAmount,
+                color: selectedType === 'expense'
+                    ? (index === 0 ? '#F94144' : pieChartColors[index % pieChartColors.length])
+                    : (index === 0 ? '#90BE6D' : pieChartColors[index % pieChartColors.length]),
+                legendFontColor: "#fff",
+                legendFontSize: 15,
+            };
+        })
+        .sort((a, b) => b.population - a.population);
+
+    const totalAmount = filteredTransactions.reduce((acc, { amount }) => acc + amount, 0);
+
+    const categoryPercentages = Object.keys(groupedTransactions)
+        .map((category, index) => {
+            const categoryTotal = groupedTransactions[category].reduce((acc, { amount }) => acc + amount, 0);
+            return {
+                category,
+                amount: categoryTotal,
+                percentage: ((categoryTotal / totalAmount) * 100).toFixed(2),
+                color: selectedType === 'expense'
+                    ? (index === 0 ? '#F94144' : pieChartColors[index % pieChartColors.length])
+                    : (index === 0 ? '#90BE6D' : pieChartColors[index % pieChartColors.length]),
+            };
+        })
+        .sort((a, b) => b.amount - a.amount);
+
+    const handlePieChartPress = (data) => {
+        console.log("Pie Chart Data clicked:", data);
+        setSelectedCategory(data.name);
+    };
 
     return (
         <View style={styles.container}>
+            {/* Header Container */}
             <View style={styles.headerContainer}>
-                <View style={styles.header}>
-                    <TouchableOpacity onPress={handlePreviousMonth}>
-                        <Text style={styles.navigationButton}>{'<'}</Text>
+                {/* Month Navigation */}
+                <View style={styles.monthNavigationContainer}>
+                    <TouchableOpacity onPress={() => setSelectedMonth(prev => (prev === 1 ? 12 : prev - 1))}>
+                        <Ionicons name="chevron-back-outline" size={30} color={Colors.primary} />
                     </TouchableOpacity>
-                    <Text style={styles.headerText}>{currentMonth} 2024</Text>
-                    <TouchableOpacity onPress={handleNextMonth}>
-                        <Text style={styles.navigationButton}>{'>'}</Text>
+
+                    <Text style={styles.monthText}>
+                        {new Date(selectedYear, selectedMonth - 1).toLocaleString('default', { month: 'long' })} {selectedYear}
+                    </Text>
+
+                    <TouchableOpacity onPress={() => setSelectedMonth(prev => (prev === 12 ? 1 : prev + 1))}>
+                        <Ionicons name="chevron-forward-outline" size={30} color={Colors.primary} />
                     </TouchableOpacity>
                 </View>
-                <View style={styles.expenseHeader}>
-                    <Text style={styles.expenseText}>Expenses: ${totalExpenses}</Text>
+
+                {/* Expense/Income Navigation */}
+                <View style={styles.typeNavigationContainer}>
+                    <TouchableOpacity onPress={() => setSelectedType('expense')}>
+                        <Ionicons name="chevron-back-outline" size={30} color={selectedType === 'expense' ? Colors.primary : '#888'} />
+                    </TouchableOpacity>
+                    <Text style={styles.typeText}>
+                        {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
+                    </Text>
+                    <TouchableOpacity onPress={() => setSelectedType('income')}>
+                        <Ionicons name="chevron-forward-outline" size={30} color={selectedType === 'income' ? Colors.primary : '#000'} />
+                    </TouchableOpacity>
                 </View>
             </View>
+
+            {/* Pie Chart */}
             <PieChart
-                data={data}
-                width={450}
+                data={pieChartData}
+                width={Dimensions.get('window').width}
                 height={250}
                 chartConfig={{
+                    backgroundColor: "#ffffff",
+                    backgroundGradientFrom: "#ffffff",
+                    backgroundGradientTo: "#ffffff",
                     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                    labelColor: () => '#FFF',
                 }}
-                accessor="amount"
+                accessor="population"
                 backgroundColor="transparent"
-                paddingLeft="100"
-                center={[10, 10]}
-                hasLegend={false}
+                paddingLeft="90"
                 absolute
-            />
-            <FlatList
-                data={data}
-                keyExtractor={(item) => item.name}
-                renderItem={({ item }) => {
-                    const percentage = ((item.amount / totalExpenses) * 100).toFixed(0); // Calculate percentage
-                    return (
-                        <View style={styles.listItem}>
-                            <View style={[styles.colorBox, { backgroundColor: item.color }]}>
-                                <Text style={styles.percentageText}>{percentage}%</Text>
-                            </View>
-                            <Text style={styles.listText}>{item.name}</Text>
-                            <Text style={styles.amountText}>${item.amount.toFixed(2)}</Text>
-                        </View>
-                    );
+                hasLegend={false}
+                onDataPointClick={(data) => handlePieChartPress(data)}
+                style={{
+                    marginVertical: 8,
+                    borderRadius: 16,
                 }}
             />
+
+            {/* Transaction List */}
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.primary} />
+            ) : (
+                <FlatList
+                    data={categoryPercentages}
+                    renderItem={({ item }) => (
+                        <View style={styles.categoryItem}>
+                            <View style={[styles.categoryPercentageBox, { backgroundColor: item.color }]}>
+                                <Text style={styles.categoryPercentage}>{item.percentage}%</Text>
+                            </View>
+                            <Text
+                                style={[styles.categoryText, {
+                                    fontWeight: selectedCategory === item.category ? 'bold' : 'normal',
+                                    color: selectedCategory === item.category ? Colors.primary : '#555'
+                                }]}
+                            >
+                                {item.category}
+                            </Text>
+                            <Text style={styles.categoryAmount}>
+                                {`${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.amount)}`}
+                            </Text>
+                        </View>
+                    )}
+                    keyExtractor={(item) => item.category}
+                    style={styles.categoryList}
+                />
+            )}
         </View>
     );
 };
@@ -113,72 +189,94 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#F9F9F9',
-        padding: 0,
     },
-
     headerContainer: {
-        backgroundColor: '#F94144',
+        backgroundColor: '#F96A6A',
         paddingVertical: 15,
-        paddingHorizontal: 20,
+        paddingHorizontal: 0,
         width: '100%',
+        marginBottom: 0,
+        paddingTop: 10,
     },
-
-    header: {
+    monthNavigationContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 10,
+        backgroundColor: '#FFFFFF',
+        paddingHorizontal: 12,
+        paddingVertical: 0,
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
+        width: '90%',
+        alignSelf: 'center',
     },
-    headerText: {
-        fontSize: 25,
-        color: '#FFF',
+    monthText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#F96A6A',
     },
-    navigationButton: {
-        fontSize: 25,
-        color: '#FFF',
-    },
-    expenseHeader: {
-        backgroundColor: '#FFF',
-        padding: 5,
-        borderRadius: 20,
+    typeNavigationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        marginVertical: 10,
+        backgroundColor: '#FFFFFF',
+        paddingHorizontal: 12,
+        paddingVertical: 0,
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
+        width: '90%',
+        alignSelf: 'center',
     },
-    expenseText: {
-        fontSize: 25,
+    typeText: {
+        fontSize: 20,
+        fontWeight: 'bold',
         color: '#F94144',
     },
-    listItem: {
+    pieChartContainer: {
+        alignItems: 'center',
+        marginBottom: 0,
+    },
+    categoryItem: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 8,
-        marginRight: 20,
-        marginLeft: 20,
-        backgroundColor: 'transparent',
-    },
-    colorBox: {
-        width: 50,
-        height: 50,
-        borderRadius: 8,
-        marginRight: 15,
-        justifyContent: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderColor: '#f0f0f0',
         alignItems: 'center',
     },
-    percentageText: {
-        fontSize: 20,
-        color: '#333',
+    categoryPercentage: {
+        fontSize: 18,
         fontWeight: 'bold',
+        width: 80,
         textAlign: 'center',
+        paddingVertical: 5,
+        paddingHorizontal: 0,
+        color: 'black',
     },
-    listText: {
-        color: '#333',
-        fontSize: 20,
+    categoryPercentageBox: {
+        marginLeft: 10,
+        marginRight: 5,
+        borderRadius: 25,
+        backgroundColor: (category) => category === 'expense' ? '#F94144' : '#90BE6D', // Example of dynamic background color
+    },
+    categoryText: {
+        fontSize: 18,
+        color: '#555',
         flex: 1,
+        marginLeft: 10,
     },
-    amountText: {
-        fontWeight: 'bold',
-        fontSize: 20,
+    categoryAmount: {
+        fontSize: 18,
         color: '#333',
+        textAlign: 'right',
+        width: 100,
+        marginRight: 10,
+    },
+    categoryList: {
+        marginTop: 10,
     },
 });
 

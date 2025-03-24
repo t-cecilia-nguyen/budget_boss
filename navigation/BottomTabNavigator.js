@@ -55,7 +55,7 @@ export default function BottomTabNavigator() {
     return (
         <View style={{ flex: 1 }}>
             <Tab.Navigator
-                initialRouteName="Transactions" 
+                initialRouteName="Transactions"
                 screenOptions={{
                     headerShown: false,
                     tabBarStyle: {
@@ -77,7 +77,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Overview tab */}
                 <Tab.Screen
                     name="Overview"
@@ -90,7 +90,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Budgets tab */}
                 <Tab.Screen
                     name="Budgets"
@@ -103,7 +103,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Categories tab */}
                 <Tab.Screen
                     name="Categories"
@@ -116,7 +116,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Reports tab */}
                 <Tab.Screen
                     name="Reports"
