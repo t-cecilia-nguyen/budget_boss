@@ -21,20 +21,6 @@ export default function Settings() {
                 </TouchableOpacity>
             </View>
 
-            {/* General section */}
-            <View style={styles.sectionContainer}>
-                <Text style={styles.titleText}>GENERAL</Text>
-                <View style={styles.toggleContainer}>
-                    <Text style={styles.text}>Notifications</Text>
-                    <Switch
-                        trackColor={{ false: '#767577', true: Colors.lightBlue }} 
-                        thumbColor={isEnabled ? '#FFFFFF' : '#F4F3F4'}
-                        onValueChange={toggleSwitch}
-                        value={isEnabled}
-                    />
-                </View>
-            </View>
-
             {/* Feedback section */}
             <View style={styles.sectionContainer}>
                 <Text style={styles.titleText}>FEEDBACK</Text>

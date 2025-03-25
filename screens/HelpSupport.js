@@ -60,7 +60,7 @@ export default function FAQ() {
         {
             question: 'How do I edit my budget?',
             answer: (
-                <Text>In the budget summary, click on <Text style={{ color: Colors.primaryBlue }}>{"\u25B6"}</Text> to expand the category budget. In the expanded view, you'll see options to update and delete the budget.
+                <Text>In the budget summary, click on <MaterialIcons name="edit" size={10} color={Colors.primaryBlue}/> to expand the category budget. In the expanded view, you'll see options to update and delete the budget.
                 Tap <Text style={{ color: Colors.primaryBlue }}>Update</Text> to open a form where you can edit the following:{"\n\n"}
                 - Start and End Date: Set the duration for your budget.{"\n"}
                 - Amount: Enter the amount for the budget limit.{"\n"}

@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from schema.seed_user_data import seed_data # import seed data for test user
 
 print("Current Working Directory:", os.getcwd())
 
@@ -49,15 +50,16 @@ def init_db():
         print("Database initialized successfully!")
         
         # Check if the database is empty before inserting seed data
-        if os.path.exists(SEED_DATA) and is_database_empty(connection):
+        if is_database_empty(connection):
             with open(SEED_DATA, 'r') as f:
                 seed_script = f.read()
                 print("Executing seed_data.sql:")
                 # Debug: Print script
-                print(seed_script)
-                connection.executescript(seed_script)
+                # print(seed_script)
+                connection.executescript(seed_script) # Execute seed data script
                 connection.commit()
                 print("Seed data inserted successfully!")
+            seed_data(connection) # Seed test user data
         else:
             print(f"Database is not empty or seed data file not found: {SEED_DATA}")
 
