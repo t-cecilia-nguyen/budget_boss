@@ -42,7 +42,6 @@ const OverviewScreen = () => {
 
             setTransactions(response.data.length ? response.data : []);
         } catch (error) {
-            console.error("Error fetching transactions: ", error);
             setTransactions([]);
         } finally {
             setLoading(false);
@@ -93,7 +92,6 @@ const OverviewScreen = () => {
         .sort((a, b) => b.amount - a.amount);
 
     const handlePieChartPress = (data) => {
-        console.log("Pie Chart Data clicked:", data);
         setSelectedCategory(data.name);
     };
 
@@ -104,7 +102,7 @@ const OverviewScreen = () => {
                 {/* Month Navigation */}
                 <View style={styles.monthNavigationContainer}>
                     <TouchableOpacity onPress={() => setSelectedMonth(prev => (prev === 1 ? 12 : prev - 1))}>
-                        <Ionicons name="chevron-back-outline" size={30} color={Colors.primary} />
+                        <Ionicons name="chevron-back-outline" size={30} color="#FFFFFF" />
                     </TouchableOpacity>
 
                     <Text style={styles.monthText}>
@@ -112,7 +110,7 @@ const OverviewScreen = () => {
                     </Text>
 
                     <TouchableOpacity onPress={() => setSelectedMonth(prev => (prev === 12 ? 1 : prev + 1))}>
-                        <Ionicons name="chevron-forward-outline" size={30} color={Colors.primary} />
+                        <Ionicons name="chevron-forward-outline" size={30} color="#FFFFFF" />
                     </TouchableOpacity>
                 </View>
 
@@ -121,8 +119,15 @@ const OverviewScreen = () => {
                     <TouchableOpacity onPress={() => setSelectedType('expense')}>
                         <Ionicons name="chevron-back-outline" size={30} color={selectedType === 'expense' ? Colors.primary : '#888'} />
                     </TouchableOpacity>
-                    <Text style={styles.typeText}>
-                        {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}
+                    <Text
+                      style={[
+                        styles.typeText,
+                        {
+                          color: selectedType === 'expense' ? '#F94144' : '#90BE6D',
+                        },
+                      ]}
+                    >
+                      {selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}: {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(totalAmount)}
                     </Text>
                     <TouchableOpacity onPress={() => setSelectedType('income')}>
                         <Ionicons name="chevron-forward-outline" size={30} color={selectedType === 'income' ? Colors.primary : '#000'} />
@@ -131,31 +136,37 @@ const OverviewScreen = () => {
             </View>
 
             {/* Pie Chart */}
-            <PieChart
-                data={pieChartData}
-                width={Dimensions.get('window').width}
-                height={250}
-                chartConfig={{
-                    backgroundColor: "#ffffff",
-                    backgroundGradientFrom: "#ffffff",
-                    backgroundGradientTo: "#ffffff",
-                    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                accessor="population"
-                backgroundColor="transparent"
-                paddingLeft="90"
-                absolute
-                hasLegend={false}
-                onDataPointClick={(data) => handlePieChartPress(data)}
-                style={{
-                    marginVertical: 8,
-                    borderRadius: 16,
-                }}
-            />
+            {filteredTransactions.length === 0 ? (
+                <Text style={styles.noDataText}>No Data is available for this month</Text>
+            ) : (
+                <PieChart
+                    data={pieChartData}
+                    width={Dimensions.get('window').width}
+                    height={250}
+                    chartConfig={{
+                        backgroundColor: "#ffffff",
+                        backgroundGradientFrom: "#ffffff",
+                        backgroundGradientTo: "#ffffff",
+                        color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                    }}
+                    accessor="population"
+                    backgroundColor="transparent"
+                    paddingLeft="90"
+                    absolute
+                    hasLegend={false}
+                    onDataPointClick={(data) => handlePieChartPress(data)}
+                    style={{
+                        marginVertical: 8,
+                        borderRadius: 16,
+                    }}
+                />
+            )}
 
             {/* Transaction List */}
             {loading ? (
                 <ActivityIndicator size="large" color={Colors.primary} />
+            ) : filteredTransactions.length === 0 ? (
+                <View />
             ) : (
                 <FlatList
                     data={categoryPercentages}
@@ -181,6 +192,7 @@ const OverviewScreen = () => {
                     style={styles.categoryList}
                 />
             )}
+
         </View>
     );
 };
@@ -203,19 +215,16 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 10,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#F96A6A',
         paddingHorizontal: 12,
         paddingVertical: 0,
-        borderRadius: 25,
-        borderWidth: 2,
-        borderColor: '#FFFFFF',
         width: '90%',
         alignSelf: 'center',
     },
     monthText: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#F96A6A',
+        color: 'white',
     },
     typeNavigationContainer: {
         flexDirection: 'row',
@@ -235,9 +244,29 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#F94144',
     },
-    pieChartContainer: {
-        alignItems: 'center',
-        marginBottom: 0,
+    noDataText: {
+        textAlign: 'center',
+        fontSize: 18,
+        color: '#555',
+        marginTop: 20,
+    },
+    totalContainer: {
+        marginTop: 20,
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        marginBottom: 20,
+    },
+    totalText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#555',
+    },
+    totalAmount: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: Colors.primary,
     },
     categoryItem: {
         flexDirection: 'row',
@@ -260,7 +289,6 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 5,
         borderRadius: 25,
-        backgroundColor: (category) => category === 'expense' ? '#F94144' : '#90BE6D', // Example of dynamic background color
     },
     categoryText: {
         fontSize: 18,
