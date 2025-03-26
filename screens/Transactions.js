@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity, Button } from 'react-native';
 import axios from 'axios';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons'; 
 import DropDownPicker from 'react-native-dropdown-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../assets/colors';
+import Toast from 'react-native-toast-message';
+import { set } from 'date-fns';
 
 const TransactionsScreen = () => {
     const [transactions, setTransactions] = useState([]);
@@ -21,10 +23,68 @@ const TransactionsScreen = () => {
     const [openYear, setOpenYear] = useState(false);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
+
+    const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
+    const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+    const balance = parseFloat((inflow - outflow).toFixed(2));
+    const balancePercentage = balance / inflow * 100;
+
     // Fetch transactions when month or year changes    
     useEffect(() => {
         fetchTransactions();
     }, [selectedMonth, selectedYear]);
+
+    // Categorize balance based on percentage
+    let balanceCategory = '';
+    if (balance < 0) {
+        balanceCategory = 'negative';
+    } else if (balancePercentage > 50) {
+        balanceCategory = 'surplus';
+    } else if (balancePercentage < 20) {
+        balanceCategory = 'low';
+    }
+
+    // Function to show the toast (for balance)
+    const showToast = () => {
+        console.log("Balance:", balance);
+
+        // Show toast based on balance category
+        if (balanceCategory === 'negative') {
+            Toast.show({
+                text1: 'Warning: Your balance is negative!',
+                text2: 'Please review your transactions and adjust your budget.',
+                position: 'top',
+                topOffset: 8,
+                type: 'error',
+                visibilityTime: 4000,
+            });
+        } else if (balanceCategory === 'surplus') {
+            Toast.show({
+                text1: `Great! Your balance is positive.`,
+                text2: "You're doing great with your finances!",
+                position: 'top',
+                topOffset: 8,
+                type: 'success',
+                visibilityTime: 4000,
+            });
+        } else if (balanceCategory === 'low') {
+            Toast.show({
+                text1: `Warning: Your balance is low!`,
+                text2: "You have less than 20% of your income left.",
+                position: 'top',
+                topOffset: 8,
+                type: 'error',
+                visibilityTime: 4000,
+            });
+        }
+    };  
+
+
+    // Show toast when balance changes
+    useEffect(() => {
+        if (loading) return;  // Prevent showing toast during loading
+        showToast();
+    }, [balance]); 
 
     // Fetch transactions from backend using stored token and selected date filters
     const fetchTransactions = async () => {
@@ -57,12 +117,8 @@ const TransactionsScreen = () => {
     
             setTransactions(response.data);
         } catch (err) {
-            console.warn('Failed to fetch transactions for selected month/year. Reverting to current month.');
-    
-            // Fallback to current month and year
-            const currentMonth = new Date().getMonth() + 1;
-            const currentYear = new Date().getFullYear();
-    
+            console.warn(`No transactions found for ${selectedMonth}/${selectedYear}`);
+
             try {
                 const token = await AsyncStorage.getItem('token');
                 const userProfileUrl = `${Constants.expoConfig.extra.API_BACKEND_URL}/profile/user`;
@@ -145,10 +201,7 @@ const TransactionsScreen = () => {
         return groups;
     }, {});
 
-    // Calculate inflow, outflow, and balance
-    const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-    const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
-    const balance = inflow - outflow;
+
 
     const monthItems = [
         { label: "January", value: 1 },
@@ -169,8 +222,7 @@ const TransactionsScreen = () => {
     const renderItem = ({ item }) => (
         <TouchableOpacity 
             style={styles.transactionItem} 
-            onPress={() => setSelectedTransactionId(item.id === selectedTransactionId ? null : item.id)}
-        >
+            onPress={() => setSelectedTransactionId(item.id === selectedTransactionId ? null : item.id)}>
             <View style={styles.transactionDetails}>
                 <View style={styles.categoryRow}>
                     {item.icon ? (
@@ -186,7 +238,7 @@ const TransactionsScreen = () => {
                     <View style={styles.transactionHeader}>
                         <Text style={styles.transactionCategory}>{item.category}</Text>
 
-                        <Text style={[styles.transactionAmount, item.type === 'income' ? styles.income : styles.expense]}>
+                        <Text style={[styles.transactionAmount, item.type === 'income' ? styles.inflow : styles.outflow]}>
                             {item.type === 'income' ? `+${item.amount}` : `-${item.amount}`}
                         </Text>
 
@@ -197,7 +249,9 @@ const TransactionsScreen = () => {
                         )}
                     </View>
                 </View>
-                <Text style={styles.transactionDescription}>{item.note || '-'}</Text>
+                {item.note ? (
+                    <Text style={styles.transactionDescription}>{item.note}</Text>
+                ) : null}
             </View>
         </TouchableOpacity>
     );
@@ -208,7 +262,11 @@ const TransactionsScreen = () => {
         <View style={styles.transactionCard}>
             <Text style={styles.groupDate}>{item[0].date}</Text>
             <View style={styles.separatorLine}></View>
-            {item.map(transaction => renderItem({ item: transaction }))}
+            {item.map(transaction => (
+                <View key={transaction.id}>
+                    {renderItem({ item: transaction })}
+                </View>
+            ))}
         </View>
     );
 
@@ -230,6 +288,7 @@ const TransactionsScreen = () => {
                         placeholder="Select Month"
                         containerStyle={styles.dropdownContainer}
                         style={styles.dropdown}
+                        
                     />
                     <DropDownPicker
                         open={openYear}
@@ -248,7 +307,7 @@ const TransactionsScreen = () => {
             </View>
 
             <View style={styles.balanceContainer}>
-                <Text style={styles.balanceText}>This Month</Text>
+                <Text style={styles.balanceText}>{monthItems.find(item => item.value === selectedMonth)?.label} {selectedYear}</Text>
                 <View style={styles.separatorLine}></View>
                 <View style={styles.progressBar}>
                     <View style={[styles.progressFill, { flex: inflow / (inflow + outflow || 1) }]} />
@@ -267,16 +326,25 @@ const TransactionsScreen = () => {
                     <View style={styles.separatorLine}></View>
                     <View style={styles.row}>
                         <Text style={styles.balanceLabel}>Balance</Text>
-                        <Text style={styles.balanceValue}>{balance}</Text>
+                        <Text style={[styles.balanceValue, balance < 0 ? styles.outflow : styles.inflow]}>
+                            {balance}
+                        </Text>     
                     </View>
                 </View>
             </View>
-
+            
             <FlatList
+                // ListEmptyComponent rendered when there are no transactions recorded
+                ListEmptyComponent={() => (
+                    <Text style={styles.noRecordsText}>No transaction records found for {monthItems.find(item => item.value === selectedMonth)?.label} {selectedYear}.</Text>
+                )}
                 data={Object.values(groupedTransactions)}
                 renderItem={renderGroupItem}
                 keyExtractor={(item, index) => item[0].date + index.toString()}  
             />
+
+            {/* Toast component */}
+            <Toast />
         </View>
     );
 };
@@ -285,6 +353,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         backgroundColor: '#F8F8F8',
+        flexGrow: 1
     },
     headerContainer: {
         alignItems: 'center',
@@ -308,22 +377,26 @@ const styles = StyleSheet.create({
     },
     dropdownContainer: {
         flex: 1,
-        marginHorizontal: 10,
+        marginHorizontal: 5,
     },
     dropdown: {
+        borderColor: Colors.grey,
         backgroundColor: '#fff',
         width: '100%',
+        minHeight: 40,
     },
     balanceContainer: {
         backgroundColor: '#ffffff',
-        padding: 16,
+        paddingHorizontal: 10,
+        paddingTop: 10,
         borderRadius: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
-        marginBottom: 16,
+        marginBottom: 10,
+        borderColor: Colors.grey,
+        borderWidth: 1,
     },
     progressBar: {
         height: 10,
@@ -356,10 +429,15 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     inflow: {
-        color: '#28a745',
+        color: Colors.green,
     },
     outflow: {
-        color: '#dc3545',
+        color: Colors.red,
+    },
+    balanceText: {
+        alignSelf: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
     balanceLabel: {
         fontSize: 16,
@@ -370,6 +448,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
+    categoryRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
     transactionCard: {
         backgroundColor: '#ffffff',
         padding: 16,
@@ -379,7 +462,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
-        elevation: 2,
+        borderColor: Colors.grey,
+        borderWidth: 1,
     },
     transactionHeader: {
         flexDirection: 'row',
@@ -388,23 +472,33 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     transactionItem: {
-        padding: 12,
+        padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+    },
+    transactionAmount: {
+        marginRight: 10,
     },
     icon: {
         width: 20,
         height: 20,
+        marginRight: 10,
+        marginLeft: -10,
     },
     transactionCategory: {
         fontSize: 16,
         fontWeight: 'bold',
-        marginLeft: 8,
     },
     transactionDescription: {
         fontSize: 14,
         color: '#777',
         marginTop: 4,
+        marginLeft: -10,
+    },
+    noRecordsText: {
+        color: Colors.greyBlue,
+        fontSize: 16,
+        textAlign: 'center',
     },
 });
 

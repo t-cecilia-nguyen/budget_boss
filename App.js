@@ -7,6 +7,7 @@ import SignUp from './screens/SignUp';
 import CreateTransactions from './screens/CreateTransactions';
 import BottomTabNavigator from './navigation/BottomTabNavigator';
 import SplashScreen from './screens/SplashScreen';
+import Toast from 'react-native-toast-message';
 
 const Stack = createStackNavigator();
 
@@ -32,6 +33,8 @@ export default function App() {
 					{/* Create Transactions screen */}
                     <Stack.Screen name="CreateTransactions" component={CreateTransactions} />
 				</Stack.Navigator>
+				<Toast />
 			</NavigationContainer>
+			
 	);
 }

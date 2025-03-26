@@ -58,15 +58,24 @@ export default function LoginScreen({ navigation }) {
                 // Save token to AsyncStorage
                 await AsyncStorage.setItem('token', token);
                 navigation.navigate('DrawerNavigator'); // Navigate to Dashboard
-            } else {
-                // Error if login fails
-                Alert.alert("Error", "An error occurred while logging in. Please try again.");
-                console.error('Login failed:', response.statusText);
-            }
+            } 
         } catch (error) {
-            // Errors during login
-            console.error('Error during login:', error);
-            Alert.alert("Error", "An error occurred while logging in. Please try again.");
+            // Handle errors specifically
+            if (error.response) {
+                // Handle 401 status for invalid login
+                if (error.response.status === 401 && error.response.data.error === "Invalid email or password") {
+                    Alert.alert("Error", "Incorrect email or password. Please try again.", [
+                        { text: "OK" },
+                    ]);
+                } else {
+                    // Handle any other backend errors
+                    Alert.alert("Error", "An error occurred while logging in. Please try again.");
+                }
+            } else {
+                // Handle network errors or unexpected errors
+                console.error("Network error or unexpected issue:", error);
+                Alert.alert("Error", "Something went wrong. Please check your connection and try again.");
+            }
         }
     };
 

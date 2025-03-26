@@ -55,7 +55,7 @@ export default function BottomTabNavigator() {
     return (
         <View style={{ flex: 1 }}>
             <Tab.Navigator
-                initialRouteName="Transactions" 
+                initialRouteName="Transactions"
                 screenOptions={{
                     headerShown: false,
                     tabBarStyle: {
@@ -77,7 +77,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Overview tab */}
                 <Tab.Screen
                     name="Overview"
@@ -90,7 +90,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Budgets tab */}
                 <Tab.Screen
                     name="Budgets"
@@ -103,7 +103,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Categories tab */}
                 <Tab.Screen
                     name="Categories"
@@ -116,7 +116,7 @@ export default function BottomTabNavigator() {
                                 color={focused ? Colors.accentYellow : Colors.grey} />
                         ),
                     }} />
-                
+
                 {/* Reports tab */}
                 <Tab.Screen
                     name="Reports"
@@ -136,7 +136,7 @@ export default function BottomTabNavigator() {
                 style={styles.floatingButton}
                 onPress={() => navigation.navigate('Create Transactions')} // Navigate to Create Transactions tab
             >
-                <MaterialIcons name="add" size={30} color={Colors.white} />
+                <MaterialIcons name="add" size={25} color={Colors.white} />
             </TouchableOpacity>
         </View>
     );
@@ -148,11 +148,11 @@ const styles = StyleSheet.create({
         right: 10,
         bottom: 60,
         backgroundColor: Colors.accentYellow,
-        width: 50,
-        height: 50,
+        width: 40,
+        height: 40,
         borderRadius: "50%",
         justifyContent: "center",
         alignItems: "center",
-        elevation: 5,
+        elevation: 3,
     },
 });
