@@ -21,10 +21,12 @@ const TransactionsScreen = () => {
     const [openYear, setOpenYear] = useState(false);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
+    // Fetch transactions when month or year changes    
     useEffect(() => {
         fetchTransactions();
     }, [selectedMonth, selectedYear]);
 
+    // Fetch transactions from backend using stored token and selected date filters
     const fetchTransactions = async () => {
         setLoading(true);
         setError(null); 
@@ -96,6 +98,7 @@ const TransactionsScreen = () => {
         }
     };
     
+    // Delete a transaction by ID
     const handleDelete = async (transactionId) => {
         if (!transactionId) {
             alert("Error: Transaction ID is missing.");
@@ -122,14 +125,17 @@ const TransactionsScreen = () => {
         }
     };
 
+    // Show loading spinner while fetching
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
 
+    // Show error if any
     if (error) {
         return <Text>{error}</Text>;
     }
 
+    // Group transactions by date
     const groupedTransactions = transactions.reduce((groups, transaction) => {
         const date = transaction.date;
         if (!groups[date]) {
@@ -139,6 +145,7 @@ const TransactionsScreen = () => {
         return groups;
     }, {});
 
+    // Calculate inflow, outflow, and balance
     const inflow = transactions.filter(item => item.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
     const outflow = transactions.filter(item => item.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
     const balance = inflow - outflow;
@@ -158,6 +165,7 @@ const TransactionsScreen = () => {
         { label: "December", value: 12 },
     ];
     
+    // Render individual transaction item
     const renderItem = ({ item }) => (
         <TouchableOpacity 
             style={styles.transactionItem} 
@@ -194,6 +202,8 @@ const TransactionsScreen = () => {
         </TouchableOpacity>
     );
 
+
+    // Render group of transactions under a single date
     const renderGroupItem = ({ item }) => (
         <View style={styles.transactionCard}>
             <Text style={styles.groupDate}>{item[0].date}</Text>
